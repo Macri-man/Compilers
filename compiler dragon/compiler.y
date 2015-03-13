@@ -2,6 +2,12 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <assert.h>
+
+
+extern void yyerror(char* message);
+extern int yylex(void);
+extern int yyparse(void);
+
 %}
 
 %token NUMBER
@@ -137,8 +143,8 @@ factor
 	| NOT factor
 	;
 
-sign
-	: '+' | '-'
+sign 
+	: ADDOP
 	;
 
 %%

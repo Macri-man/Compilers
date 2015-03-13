@@ -9,8 +9,16 @@ void echo(char *message);
 %}
 
 ident     	[a-zA-Z][a-zA-Z0-9]*
-number    	[0-9]
+
+digit       [0-9]
+digits      [0-9]+
+frac        [0-9]+\.([0-9]+)
+exp         [eE](\+|\-)?([0-9]+)
+number      [0-9]+(\.[0-9]+)?([eE](\+|\-)?[0-9]+)?
+
+
 whitespace 	[ \t]+
+
 
 %%
 
