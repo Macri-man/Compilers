@@ -47,6 +47,76 @@ tree_t *make_id(node_t *node){
 	return p;
 }
 
+tree_t *make_program(int type,tree_t *id,tree_t *idlist,tree_t *decl,tree_t *subprogdecl,tree_t *compstm){
+	
+	tree_t *prog4=make_tree(SUBPROGDECL,subprogdecl,NULL);
+	tree_t *prog3=make_tree(STATEMENT,compstm,prog4);
+	tree_t *prog2=make_tree(DECL,decl,prog3);
+	tree_t *prog1=make_tree(LIST,idlist,prog2);
+	tree_t *prog=make_tree(type,id,prog1);
+	return prog;
+}
+
+tree_t *make_decl(int type,tree_t *decl,tree_t *idlist,tree_t *type){
+	
+	tree_t *prog2=make_tree(TYPE,type,NULL);
+	tree_t *prog1=make_tree(LIST,idlist,prog2);
+	tree_t *prog=make_tree(type,decl,prog1);
+	return prog;
+}
+
+tree_t *make_array(int type,tree_t *arr,tree_t *firstnum,tree_t *lastnum,tree_t *stdtype){
+	
+	tree_t *prog3=make_tree(TYPE,stdtype,NULL);
+	tree_t *prog2=make_tree(INUM,lastnum,prog3);
+	tree_t *prog1=make_tree(INUM,firstnum,prog2);
+	tree_t *prog=make_tree(type,arr,prog1);
+	return prog;
+}
+
+tree_t *make_subdecl(int type,tree_t *subproghead,tree_t *decl,tree_t *compstm){
+	
+	tree_t *prog2=make_tree(STATEMENT,compstm,NULL);
+	tree_t *prog1=make_tree(DECL,decl,prog2);
+	tree_t *prog=make_tree(type,subproghead,prog1);
+	return prog;
+}
+
+tree_t *make_function(int type,tree_t *id,tree_t *arguments,tree_t *stdtype){
+	
+	tree_t *prog2=make_tree(TYPE,stdtype,NULL);
+	tree_t *prog1=make_tree(LIST,arguments,prog2);
+	tree_t *prog=make_tree(type,id,prog1);
+	return prog;
+}
+tree_t *make_procedure(int type,tree_t *id,tree_t *arguments){
+
+	tree_t *prog1=make_tree(LIST,arguments,NULL);
+	tree_t *prog=make_tree(type,id,prog1);
+	return prog;
+}
+tree_t *make_parlist(int type,tree_t *parlist,tree_t *idlist,tree_t *type){
+
+	tree_t *prog2=make_tree(TYPE,type,NULL);
+	tree_t *prog1=make_tree(LIST,idlist,prog2);
+	tree_t *prog=make_tree(type,parlist,prog1);
+	return prog;
+}
+
+tree_t *make_cond(int type,tree_t *expr,tree_t *stm,tree_t *stm){
+
+	tree_t *prog1=make_tree(LIST,stm,stm);
+	tree_t *prog=make_tree(type,expr,prog1);
+	return prog;
+}
+
+tree_t *make_whdo(int type,tree_t *expr,tree_t *stm){
+
+	tree_t *prog=make_tree(type,expr,stm);
+	return prog;
+}
+
+
 
 /* preorder */
 void print_tree(tree_t *t, int spaces){
@@ -73,13 +143,13 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[RNUM:%f\n",t->attribute.rval);
 			break;
 		case ADDOP:
-			fprintf(stderr, "[ADDOP:%d\n",t->attribute.opval);
+			print_ADDOP(t->type);
 			break;
 		case MULOP: 
-			fprintf(stderr, "[MULLOP:%d\n",t->attribute.opval);
+			print_MULOP(t->type);
 			break;
 		case RELOP: 
-			fprintf(stderr, "[RELOP:%d\n",t->attribute.opval);
+			print_RELOP(t->type);
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
@@ -91,3 +161,68 @@ void print_tree(tree_t *t, int spaces){
 	print_tree(t->right,spaces+4);
 
 }
+
+void print_ADDOP(int opval){
+	swtich(opval){
+		case OR:
+			fprintf(stderr, "[ADDOP: or\n");
+			break;
+		case PLUS:
+			fprintf(stderr, "[ADDOP: +\n");
+			break;
+		case MINUS:
+			fprintf(stderr, "[ADDOP: -\n");
+			break;
+		default:
+			fprintf(stderr, "[UNKOWN]");
+	}
+}
+
+void print_MULOP(int opval){
+	switch(opval){
+		case AND:
+			fprintf(stderr, "[MULLOP: and\n");
+			break;
+		case STAR:
+			fprintf(stderr, "[MULLOP: *\n");
+			break;
+		case SLASH:
+			fprintf(stderr, "[MULLOP: /\n");
+			break;
+		case DIV:
+			fprintf(stderr, "[MULLOP: div\n");
+			break;
+		case MOD:
+			fprintf(stderr, "[MULLOP: mod\n");
+			break;
+		default:
+			fprintf(stderr, "[UNKOWN]");
+	}
+}
+
+void print_RELOP(int opval){
+	switch(opval){
+		case LT:
+			fprintf(stderr, "[RELOP: <\n");
+			break;
+		case LE:
+			fprintf(stderr, "[RELOP: <=\n");
+			break;
+		case GT:
+			fprintf(stderr, "[RELOP: >\n");
+			break;
+		case GE:
+			fprintf(stderr, "[RELOP: =>\n");
+			break;
+		case EQ:
+			fprintf(stderr, "[RELOP: =\n");
+			break;
+		case NEQ:
+			fprintf(stderr, "[RELOP: <>\n");
+			break;
+		default:
+			fprintf(stderr, "[UNKOWN]");
+	}
+}
+
+

@@ -17,6 +17,7 @@ int line_number;
 ident     	[a-zA-Z][a-zA-Z0-9]*
 num      	[0-9]+
 whitespace 	[ \t]+
+comment     \{\*.*\*\}
 
 
 %%
@@ -26,9 +27,9 @@ whitespace 	[ \t]+
 "of"			{ echo("OF "); return OF; }
 "integer"		{ echo("INTEGER "); return INTEGER; }
 "real"			{ echo("REAL "); return REAL; }
-"string"   { echo("STRING "); return STRING; }
-"char"      { echo("CHAR "); return CHAR; }
-"boolean"      { echo("BOOLEAN "); return BOOLEAN; }
+"string"   		{ echo("STRING "); return STRING; }
+"char"      	{ echo("CHAR "); return CHAR; }
+"boolean"      	{ echo("BOOLEAN "); return BOOLEAN; }
 "function"		{ echo("FUNCTION "); return FUNCTION; }
 "procedure"		{ echo("PROCEDURE "); return PROCEDURE; }
 "begin"			{ echo("BEGIN "); return BBEGIN; }
@@ -64,7 +65,7 @@ whitespace 	[ \t]+
 {num}"."{num}		{ fprintf(stderr, "RNUM[%f] ", yylval.rval = atof(yytext)); return RNUM; }
 {ident}				{ fprintf(stderr, "ID[%s] ", yylval.sval = strdup(yytext)); return ID; 	}
 
-
+{comment}    { ; }
 {whitespace} { ; }
 \n 			{ fprintf(stderr, "%s ", yytext); line_number++; }
 .			{ fprintf(stderr, "<%c> ", yytext[0]); return yytext[0]; }

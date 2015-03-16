@@ -4,12 +4,13 @@
 #include "scope.h"
 
 /*constructor */
-scope_t *make_scope(){
+scope_t *make_scope(char *name){
 	int i;
 	scope_t *p=(scope_t *)malloc(sizeof(scope_t));
 	for(i=0;i<HASH_SIZE;i++){
 		p->table[i]=NULL;
 	}
+	p->name=strdup(name);
 	p->next=NULL;
 	return p;
 }
@@ -52,8 +53,8 @@ node_t *scope_search_all(scope_t *curr_scope,char *name){
 }
 
 /* push new one */
-scope_t *scope_push(scope_t *top){
-	scope_t *new_scope=make_scope();
+scope_t *scope_push(scope_t *top, char *name){
+	scope_t *new_scope=make_scope(name);
 	assert(new_scope!=NULL);
 	new_scope->next=top;
 	return new_scope;
