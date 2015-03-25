@@ -116,7 +116,7 @@ type
 	| ARRAY '[' INUM DOTDOT INUM ']' OF standard_type
 		{ 
 			scope_insert(top_scope,"ARRAY");
-			$$ = make_array(ARRAY,make_arr(scope_insert(top_scope,"ARRAY")),make_inum(INUM),make_inum(INUM),$8); 
+			$$ = make_array(ARRAY,make_arr(scope_search(top_scope,"ARRAY")),make_inum(INUM),make_inum(INUM),$8); 
 		}
 	;
 
@@ -188,6 +188,13 @@ statement_list
 	;
 
 statement
+	: conditions
+		{ $$ = $1; }
+	| ifelse
+		{ $$ = $1; }
+	;
+
+conditions
 	: variable ASSIGNOP expression
 		{ $$ = make_op(ASSIGNOP,$2,$1,$3); }
 	| procedure_statement
@@ -198,7 +205,23 @@ statement
 		{ $$ = make_cond(CONDITIONAL,$2,$4,$6); }
 	| WHILE expression DO statement
 		{ $$ = make_tree(WHILE_DO,$1,$2); }
+	| FOR ID ASSIGNOP expression TO expression DO conditions
+		{
+			$$ = make_tree(FOR,make_id(scope_search(top_scope,$2)),make_tree(DO,make_tree(TO,$4,$6),$8));
+		}
 	;
+
+ifelse
+	: IF expression THEN statement
+		{
+			$$ = make_tree(IF,$2,$4);
+		}
+	| IF expression THEN conditions ELSE ifelse
+		{
+			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
+		}
+	;
+
 
 variable
 	: ID
