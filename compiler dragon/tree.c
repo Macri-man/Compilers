@@ -58,19 +58,18 @@ tree_t *make_program(int type,tree_t *id,tree_t *idlist,tree_t *decl,tree_t *sub
 }
 
 tree_t *make_decl(int type,tree_t *decl,tree_t *idlist,tree_t *type){
-	
 	tree_t *prog2=make_tree(TYPE,type,NULL);
 	tree_t *prog1=make_tree(LIST,idlist,prog2);
 	tree_t *prog=make_tree(type,decl,prog1);
 	return prog;
 }
 
-tree_t *make_array(int type,tree_t *arr,tree_t *firstnum,tree_t *lastnum,tree_t *stdtype){
+tree_t *make_array(int type,tree_t *firstnum,tree_t *lastnum,tree_t *stdtype){
 	
 	tree_t *prog3=make_tree(TYPE,stdtype,NULL);
-	tree_t *prog2=make_tree(INUM,lastnum,prog3);
+	tree_t *prog2=make_tree(INUM,NULL,lastnum);
 	tree_t *prog1=make_tree(INUM,firstnum,prog2);
-	tree_t *prog=make_tree(type,arr,prog1);
+	tree_t *prog=make_tree(type,prog3,prog1);
 	return prog;
 }
 

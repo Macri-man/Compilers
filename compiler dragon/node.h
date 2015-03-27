@@ -3,7 +3,8 @@
 
 typedef struct node_s{
 	char *name;
-	int type;	
+	int type;
+	int num;	
 
 	struct node_s *next;
 }node_t;

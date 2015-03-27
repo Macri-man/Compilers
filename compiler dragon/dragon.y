@@ -12,7 +12,7 @@
 	extern int yyparse(void);
 
 	extern scope_t *top_scope;
-	extern node_t *tmp;
+	extern node_t *temp;
 %}
 
 %union{
@@ -80,43 +80,41 @@ program:
 	subprogram_declarations
 	compound_statement
 	'.'
-	{ 
-		scope_insert(top_scope,"PROGRAM");
-		scope_insert(top_scope,$2);
-		$$ = make_program(PROGRAM,make_id(scope_search(top_scope,$2),$3,$7,$8,$9);
+	{
+		$$ = make_program(PROGRAM,make_id(scope_insert(top_scope,$2),$3,$7,$8,$9);
 		top_scope = scope_pop(top_scope);
 	}
 	;
 
 identifier_list
 	: ID
-		{ 
-			scope_insert(top_scope,$1); 
-			$$ = make_tree(make_id(scope_search(top_scope,$1)));
+		{
+			$$ = make_id(temp=scope_insert(top_scope,$1));
+			temp->type=ID;
 		}
 	| identifier_list ',' ID
 		{ 
-			scope_insert(top_scope,$3);
-			$$ = make_tree(LIST,$1,make_id(scope_search(top_scope,$3))); 
+			$$ = make_tree(LIST,$1,make_id(scope_insert(top_scope,$3)));
+			temp->type=ID; 
 		}
 	;
 
 declarations
 	: declarations VAR identifier_list ':' type ';'
 		{ 
+			set_names($3,$5,LOCAL);
 			$$ = make_decl(VAR,$1,$3,$5); 
 		}
 	| /* empty */
-		{ $$ = make_tree(EMTPY,NULL,NULL); }
+		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
 
 type 
 	: standard_type
-		{ $$ = make_tree($1,NULL,NULL); }
+		{ $$ = $1; }
 	| ARRAY '[' INUM DOTDOT INUM ']' OF standard_type
 		{ 
-			scope_insert(top_scope,"ARRAY");
-			$$ = make_array(ARRAY,make_arr(scope_search(top_scope,"ARRAY")),make_inum(INUM),make_inum(INUM),$8); 
+			$$ = make_array(ARRAY,make_inum(INUM),make_inum(INUM),$8); 
 		}
 	;
 
@@ -147,25 +145,31 @@ subprogram_head
 	: FUNCTION ID 
 		{	top_scope = scope_push(top_scope,"FUNCTION"); }
 			arguments ':' standard_type ';'
-		{	$$ = make_function(FUNCTION,make_id(ID),$3,$5);}
+		{	$$ = make_function(FUNCTION,make_id(scope_insert(top_scope,ID)),$3,$5);}
 	| PROCEDURE ID 
 		{	top_scope = scope_push(top_scope,"PROCEDURE"); }
 		arguments ';'
-		{ $$ = make_procedure(PROCEDRUE,make_id(ID),$3); }
+		{ $$ = make_procedure(PROCEDURE,make_id(scope_insert(top_scope,ID)),$3); }
 	;
 
 arguments
 	: '(' parameter_list ')'
 		{ $$ = $2; }
 	| /* empty */
-		{ $$ = make_tree(EMTPY,NULL,NULL); }
+		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
 
 parameter_list
 	: identifier_list ':' type
-		{ $$ = make_tree(TYPE,$1,$2); }
+		{ 
+			set_names($1,$3,PARAMETER);
+			$$ = make_tree(TYPE,$1,$2); 
+		}
 	| parameter_list ';' identifier_list ':' type
-		{ $$ = make_parlist(LIST,$1,$3,$5); }
+		{ 	
+			set_names($3,$5,PARAMETER);
+			$$ = make_parlist(LIST,$1,$3,$5); 
+		}
 	;
 
 compound_statement
@@ -207,7 +211,7 @@ conditions
 		{ $$ = make_tree(WHILE_DO,$1,$2); }
 	| FOR ID ASSIGNOP expression TO expression DO conditions
 		{
-			$$ = make_tree(FOR,make_id(scope_search(top_scope,$2)),make_tree(DO,make_tree(TO,$4,$6),$8));
+			$$ = make_tree(FOR,make_id(scope_insert(top_scope,$2)),make_tree(DO,make_tree(TO,$4,$6),$8));
 		}
 	;
 
@@ -276,12 +280,13 @@ factor
 					$$ = make_id(tmp); 
 				}
 	| ID '(' expression_list ')' 
-		{ 
+		{
 			if((tmp=scope_search_all(top_scope,$1)) == NULL){
 						fprintf(stderr,"Name %s used but not defined\n",$1);
 						exit(1);
 					}
-			$$ = make_tree(FUNCTION_CALL,make_id(tmp),$3); 
+			$$ = make_tree(FUNCTION_CALL,make_id(tmp),$3);
+			check_function($$,FUNCTION); 
 		}
 	| ID '[' expression_list ']' 
 		{ 
@@ -290,6 +295,7 @@ factor
 						exit(1);
 					}
 			$$ = make_tree(ARRAY_ACCESS,make_id(tmp),$3); 
+			check_array($$,ARRAY_ACCESS);
 		}
 	| INUM
 		{ $$ = make_inum($1); }
@@ -307,7 +313,7 @@ factor
 
 
 scope_t *top_scope;
-node_t *tmp;
+node_t *temp;
 main(){
 	top_scope=NULL;
 	tmp=NULL;
