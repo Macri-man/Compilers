@@ -25,6 +25,7 @@
 
 	/* semantic + code gen */
 	tree_t *tval;
+	list_t *lval;
 }
 
 %token NUMBER 
@@ -54,7 +55,7 @@
 %token LIST ARRAY_ACCESS STATEMENT
 %token FUNCTION_CALL PROCEDURE_CALL
 %token WHILE_DO DECL SUBDECL SUBPROGDECL
-%token LOCAL PARAMETER
+%token LOCAL PARAMETER IDLIST
 
 %type <tval> program
 %type <tval> expression
@@ -64,10 +65,11 @@
 %type <tval> type
 %type <tval> subprogram_declaration
 %type <tval> expression_list
-%type <tval> identifier_list
 %type <tval> declarations
 %type <tval> subprogram_declarations
 %type <tval> subprogram_declaration
+
+%type <lval> identifier_list
 
 %type <cval> sign
 
@@ -90,13 +92,14 @@ program:
 identifier_list
 	: ID
 		{
-			$$ = make_id(temp=scope_insert(top_scope,$1));
+			$$ = make_list(scope_insert(top_scope,$1),ID,ID);
 			//temp->type=ID;
 		}
 	| identifier_list ',' ID
-		{ 
-			$$ = make_tree(LIST,$1,make_id(scope_insert(top_scope,$3)));
-			//temp->type=ID; 
+		{
+			$$ = list_append($1,scope_insert(top_scope,$3));
+			//temp->type=ID;
+			//append_list($$,$3); 
 		}
 	;
 
@@ -104,7 +107,7 @@ declarations
 	: declarations VAR identifier_list ':' type ';'
 		{
 			//set_names($3,$5,LOCAL);
-			$$ = make_decl(VAR,$1,$3,$5,LOCAL); 
+			$$ = make_decl(VAR,$1,make_idlist(IDLIST,$3),$5,LOCAL); 
 		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
@@ -164,12 +167,12 @@ parameter_list
 	: identifier_list ':' type
 		{ 
 			//set_names($1,$3,PARAMETER);
-			$$ = make_parlist(LIST,NULL,$1,$2,PARAMETER); 
+			$$ = make_parlist(LIST,$1,make_idlist(IDLIST,$2),PARAMETER); 
 		}
 	| parameter_list ';' identifier_list ':' type
 		{ 	
 			//set_names($3,$5,PARAMETER);
-			$$ = make_parlist(LIST,$1,$3,$5,PARAMETER); 
+			$$ = parlist_list(LIST,$1,make_idlist(IDLIST,$3),$5,PARAMETER); 
 		}
 	;
 

@@ -8,7 +8,7 @@ typedef struct tree_s {
 		float rval;  /* RNUM */
 		int opval;	/* ADDOP, MULOP  */
 		node_t *sval;	/* ID */
-		list_ *lval;
+		list_t *lval;
 	} attribute;
 	struct tree_s *left;
 	struct tree_s *right;
@@ -27,11 +27,15 @@ tree_t *make_array(int type,tree_t *arr,tree_t *firstnum,tree_t *lastnum,tree_t 
 tree_t *make_subdecl(int type,tree_t *subproghead,tree_t *decl,tree_t *compstm);
 tree_t *make_function(int type,tree_t *id,tree_t *arguments,tree_t *stdtype);
 tree_t *make_procedure(int type,tree_t *id,tree_t *arguments);
-tree_t *make_parlist(int type,tree_t *parlist,tree_t *idlist,tree_t *type,int mark);
 tree_t *make_cond(int type,tree_t *expr,tree_t *stm,tree_t *stm);
 tree_t *make_whdo(int type,tree_t *expr,tree_t *stm);
+tree_t *make_idlist(int type,tree_t *idlist);
 
-void assign_mark(tree_t *t,int mark);
+tree_t *make_parlist(int type,tree_t *idlist,tree_t *type,int mark);
+tree_t *parlist_list(int type,tree_t *parlist,tree_t *idlist,tree_t *type,int mark); 
+
+void assign_mark(list_t *t,int mark);
+void assign_type(list_t *t,int type);
 
 void print_tree(tree_t *t, int spaces); 
 void print_ADDOP(int opval);

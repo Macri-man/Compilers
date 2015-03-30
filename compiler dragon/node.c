@@ -23,3 +23,7 @@ node_t *node_insert(node_t *head,char *name){
 	p->next=head;
 	return p;
 }
+
+void append_list(tree_t *list,tree_t *t){
+	
+}

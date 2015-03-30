@@ -6,7 +6,22 @@
 #include "tree.h"
 #include "y.tab.h"
 
-/* contructor */
+void assign_mark(list_t *l,int mark){
+	list_t *temp=NULL;
+	for(temp=l;temp!=NULL;temp=temp->next){
+		temp->mark=mark;
+		temp->node->mark=mark;
+	}
+}
+
+void assign_type(list_t *l,int type){
+	list_t *temp=NULL;
+	for(temp=l;temp!=NULL;temp=temp->next){
+		temp->type=type;
+		temp->node->type=type;
+	}
+}
+
 tree_t *make_tree(int type, tree_t *left, tree_t *right){
 
 	tree_t *p=(tree_t *)malloc(sizeof(tree_t));
@@ -57,32 +72,12 @@ tree_t *make_program(int type,tree_t *id,tree_t *idlist,tree_t *decl,tree_t *sub
 	return prog;
 }
 
-void assign_mark(tree_t *t,int mark){
-	tree_t *temp;
-	for(temp=t;temp!=NULL;temp=temp->left){
-		t->attribute.sval->mark=mark;
-	}
-	for(temp=t;temp!=NULL;temp=temp->right){
-		t->attribute.sval->mark=mark;
-	}
-}
-
-void assign_type(tree_t *t,int type){
-	tree_t *temp;
-	for(temp=t;temp!=NULL;temp=temp->left){
-		t->attribute.sval->type=type;
-	}
-	for(temp=t;temp!=NULL;temp=temp->right){
-		t->attribute.sval->type=type;
-	}
-}
-
 tree_t *make_decl(int type,tree_t *decl,tree_t *idlist,tree_t *ttype,int mark){
-	assign_mark(idlist,mark);
+	assign_mark(idlist->lval,mark);
 	if(ttype->ARRAY){
-		assign_type(id,ttype->left->type);
+		assign_type(idlist->lval,ttype->left->type);
 	}else{
-		assign_type(id,ttype->type);
+		assign_type(idlist->lval,ttype->type);
 	}
 	tree_t *prog2=make_tree(TYPE,ttype,NULL);
 	tree_t *prog1=make_tree(LIST,idlist,prog2);
@@ -108,7 +103,7 @@ tree_t *make_subdecl(int type,tree_t *subproghead,tree_t *decl,tree_t *compstm){
 }
 
 tree_t *make_function(int type,tree_t *id,tree_t *arguments,tree_t *stdtype){
-	assign_type(id,stdtype->type);
+	assign_type(id->lval=make_list(id->sval,id->sval->name,NULL),stdtype->type);
 	tree_t *prog2=make_tree(TYPE,stdtype,NULL);
 	tree_t *prog1=make_tree(LIST,arguments,prog2);
 	tree_t *prog=make_tree(type,id,prog1);
@@ -120,16 +115,35 @@ tree_t *make_procedure(int type,tree_t *id,tree_t *arguments){
 	tree_t *prog=make_tree(type,id,prog1);
 	return prog;
 }
-tree_t *make_parlist(int type,tree_t *parlist,tree_t *idlist,tree_t *ttype,int mark){
-	assign_mark(idlist,mark);
+
+tree_t *make_idlist(int type,list_t *idlist){
+	tree_t *t=make_tree(type,NULL,NULL);
+	t->lval=idlist;
+	return t;
+}
+
+tree_t *parlist_list(int type,tree_t *parlist,tree_t *idlist,tree_t *ttype,int mark){
+	assign_mark(idlist->lval,mark);
 	if(ttype->ARRAY){
-		assign_type(id,ttype->left->type);
+		assign_type(idlist->lval,ttype->left->type);
 	}else{
-		assign_type(id,ttype->type);
+		assign_type(idlist->lval,ttype->type);
 	}
 	tree_t *prog2=make_tree(TYPE,ttype,NULL);
 	tree_t *prog1=make_tree(LIST,idlist,prog2);
 	tree_t *prog=make_tree(type,parlist,prog1);
+	return prog;
+}
+
+tree_t *make_parlist(int type,tree_t *idlist,tree_t *ttype,int mark){
+	assign_mark(idlist->lval,mark);
+	if(ttype->ARRAY){
+		assign_type(idlist->lval,ttype->left->type);
+	}else{
+		assign_type(idlist->lval,ttype->type);
+	}
+	tree_t *prog1=make_tree(TYPE,ttype,NULL);
+	tree_t *prog=make_tree(type,idlist,prog1);
 	return prog;
 }
 

@@ -3,11 +3,12 @@
 #include <string.h>
 #include "list.h"
 
-list_t *make_list(tree_t *tree,char *name,int type){
+list_t *make_list(node_t *node,char *name,int type){
 	list_t *p=(list_t*)malloc(sizeof(list_t));
-	p->tree=tree;
+	p->head=node;
 	p->name=name;
 	p->type=type;
+	p->next=NULL;
 	return p;
 }
 
@@ -19,8 +20,8 @@ void list_print(list_t *head){
 	}
 }
 
-list_t *list_insert(list_t *head,tree_t *tree){
-	list_t *p=make_list(tree_t *tree);
+list_t *list_append(list_t *head,node_t *node){
+	list_t *p=make_list(node,node->name,node->type);
 	p->next=head;
 	return p;
 }
