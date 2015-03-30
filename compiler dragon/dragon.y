@@ -54,6 +54,7 @@
 %token LIST ARRAY_ACCESS STATEMENT
 %token FUNCTION_CALL PROCEDURE_CALL
 %token WHILE_DO DECL SUBDECL SUBPROGDECL
+%token LOCAL PARAMETER
 
 %type <tval> program
 %type <tval> expression
@@ -90,20 +91,20 @@ identifier_list
 	: ID
 		{
 			$$ = make_id(temp=scope_insert(top_scope,$1));
-			temp->type=ID;
+			//temp->type=ID;
 		}
 	| identifier_list ',' ID
 		{ 
 			$$ = make_tree(LIST,$1,make_id(scope_insert(top_scope,$3)));
-			temp->type=ID; 
+			//temp->type=ID; 
 		}
 	;
 
 declarations
 	: declarations VAR identifier_list ':' type ';'
-		{ 
-			set_names($3,$5,LOCAL);
-			$$ = make_decl(VAR,$1,$3,$5); 
+		{
+			//set_names($3,$5,LOCAL);
+			$$ = make_decl(VAR,$1,$3,$5,LOCAL); 
 		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
@@ -119,9 +120,9 @@ type
 	;
 
 standard_type
-	: INTEGER { $$ = make_tree(INTEGER,NULL,NULL); }
+	: INTEGER 	{ $$ = make_tree(INTEGER,NULL,NULL); }
 	| REAL		{ $$ = make_tree(REAL,NULL,NULL); }
-	| CHAR    { $$ = make_tree(CHAR,NULL,NULL); }
+	| CHAR    	{ $$ = make_tree(CHAR,NULL,NULL); }
 	| STRING	{ $$ = make_tree(STRING,NULL,NULL); }
 	| BOOLEAN	{ $$ = make_tree(BOOLEAN,NULL,NULL); }
 	;
@@ -130,7 +131,7 @@ subprogram_declarations
 	: subprogram_declarations subprogram_declaration ';'
 		{ $$ = make_tree(SUBDECL,$1,$2); }
 	| /* empty */
-		{ $$ = make_tree(EMTPY,NULL,NULL); }
+		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
 
 subprogram_declaration
@@ -162,13 +163,13 @@ arguments
 parameter_list
 	: identifier_list ':' type
 		{ 
-			set_names($1,$3,PARAMETER);
-			$$ = make_tree(TYPE,$1,$2); 
+			//set_names($1,$3,PARAMETER);
+			$$ = make_parlist(LIST,NULL,$1,$2,PARAMETER); 
 		}
 	| parameter_list ';' identifier_list ':' type
 		{ 	
-			set_names($3,$5,PARAMETER);
-			$$ = make_parlist(LIST,$1,$3,$5); 
+			//set_names($3,$5,PARAMETER);
+			$$ = make_parlist(LIST,$1,$3,$5,PARAMETER); 
 		}
 	;
 
@@ -200,28 +201,42 @@ statement
 
 conditions
 	: variable ASSIGNOP expression
-		{ $$ = make_op(ASSIGNOP,$2,$1,$3); }
+		{ 
+			if(type($1)!=type($3)) fprintf(stderr,"Line: %d: Type Mismatch: \n",line_number);
+			$$ = make_op(ASSIGNOP,$2,$1,$3); 
+		}
 	| procedure_statement
 		{ $$ = $1; }
 	| compound_statement
 		{ $$ = $1; }
 	| IF expression THEN statement ELSE statement
-		{ $$ = make_cond(CONDITIONAL,$2,$4,$6); }
+		{ 
+			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
+			$$ = make_cond(CONDITIONAL,$2,$4,$6); 
+		}
 	| WHILE expression DO statement
-		{ $$ = make_tree(WHILE_DO,$1,$2); }
+		{ 
+			if(type($2)!=BOOLEAN) { fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  }
+			$$ = make_tree(WHILE_DO,$1,$2); 
+		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
-		{
-			$$ = make_tree(FOR,make_id(scope_insert(top_scope,$2)),make_tree(DO,make_tree(TO,$4,$6),$8));
+		{	
+			temp=scope_search(top_scope,$2);
+			if(type(make_id(temp))!=type($4)) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
+			if(type(make_id(temp))!=type($6)) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
+			$$ = make_tree(FOR,make_id(temp),make_tree(DO,make_tree(TO,$4,$6),$8));
 		}
 	;
 
 ifelse
 	: IF expression THEN statement
 		{
+			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: TBoolean Error: \n",line_number); print_tree($2,0); 
 			$$ = make_tree(IF,$2,$4);
 		}
 	| IF expression THEN conditions ELSE ifelse
 		{
+			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number); print_tree($2,0); 
 			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
 		}
 	;
@@ -231,14 +246,23 @@ variable
 	: ID
 		{ $$ = make_id(scope_search(top_scope,$1)); }
 	| ID '[' expression ']'
-		{ $$ = make_tree(ARRAY_ACCESS,make_id(scope_search(top_scope,$1)),$3); }
+		{ 
+			$$ = make_tree(ARRAY_ACCESS,make_id(scope_search(top_scope,$1)),$3);
+			check_array($$,ARRAY_ACCESS); 
+		}
 	;
 
 procedure_statement
 	: ID
-	 	{ $$ = make_id(scope_search(top_scope,$1)); }
+	 	{ 
+	 		$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),NULL); 
+	 		check_procedure($$,PROCEDURE);
+	 	}
 	| ID '(' expression_list ')'
-		{ $$ = make_tree(PROCEDURE_CALL,make_id(scope_search(top_scope,$1)),$3); }
+		{ 
+			$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),$3); 
+			check_procedure($$,PROCEDURE);
+		}
 	;
 
 expression_list
@@ -273,7 +297,7 @@ term
 
 factor
 	: ID { 	
-			if((tmp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 					exit(1);
 				}
@@ -281,20 +305,20 @@ factor
 				}
 	| ID '(' expression_list ')' 
 		{
-			if((tmp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1)) == NULL){
 						fprintf(stderr,"Name %s used but not defined\n",$1);
 						exit(1);
 					}
-			$$ = make_tree(FUNCTION_CALL,make_id(tmp),$3);
+			$$ = make_tree(FUNCTION_CALL,make_id(temp),$3);
 			check_function($$,FUNCTION); 
 		}
 	| ID '[' expression_list ']' 
 		{ 
-			if((tmp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1)) == NULL){
 						fprintf(stderr,"Name %s used but not defined\n",$1);
 						exit(1);
 					}
-			$$ = make_tree(ARRAY_ACCESS,make_id(tmp),$3); 
+			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3); 
 			check_array($$,ARRAY_ACCESS);
 		}
 	| INUM
@@ -304,7 +328,7 @@ factor
 	| '(' expression ')'
 		{$$ = $2; }
 	| NOT factor
-		{ $$ = make_tree(NOT,NULL,NULL); }
+		{ $$ = make_tree(NOT,$2,NULL); }
 	;
 
 

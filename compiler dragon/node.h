@@ -4,7 +4,7 @@
 typedef struct node_s{
 	char *name;
 	int type;
-	int num;	
+	int mark;	
 
 	struct node_s *next;
 }node_t;
