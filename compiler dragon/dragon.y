@@ -97,7 +97,7 @@ identifier_list
 		}
 	| identifier_list ',' ID
 		{
-			$$ = list_append($1,scope_insert(top_scope,$3));
+			$$ = list_append_node($1,scope_insert(top_scope,$3));
 			//temp->type=ID;
 			//append_list($$,$3); 
 		}
@@ -167,7 +167,7 @@ parameter_list
 	: identifier_list ':' type
 		{ 
 			//set_names($1,$3,PARAMETER);
-			$$ = make_parlist(LIST,$1,make_idlist(IDLIST,$2),PARAMETER); 
+			$$ = make_parlist(LIST,make_idlist(IDLIST,$1),$3,PARAMETER); 
 		}
 	| parameter_list ';' identifier_list ':' type
 		{ 	
