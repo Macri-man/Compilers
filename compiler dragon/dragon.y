@@ -4,7 +4,9 @@
 	#include <assert.h>
 	#include "node.h"
 	#include "scope.h"
+	#include "list.h"
 	#include "tree.h"
+	#include "semantic.h"
 	#include "y.tab.h"
 
 	extern void yyerror(char* message);
@@ -26,6 +28,8 @@
 	/* semantic + code gen */
 	tree_t *tval;
 	list_t *lval;
+
+	int type;
 }
 
 %token NUMBER 
@@ -49,30 +53,42 @@
 %token FUNCTION PROCEDURE
 %token BBEGIN END
 %token IF THEN ELSE
-%token WHILE DO
+%token WHILE DO FOR TO
 
 %token EMTPY CONDITIONAL TYPE
 %token LIST ARRAY_ACCESS STATEMENT
 %token FUNCTION_CALL PROCEDURE_CALL
 %token WHILE_DO DECL SUBDECL SUBPROGDECL
-%token LOCAL PARAMETER IDLIST
+%token LOCAL PARAMETER IDLIST EXPR EXPRLIST PARALIST ARGLIST DECLIST STATLIST PROCSTAT COMPSTAT
 
 %type <tval> program
 %type <tval> expression
+%type <tval> expression_list
 %type <tval> simple_expression
 %type <tval> term
 %type <tval> factor
 %type <tval> type
-%type <tval> subprogram_declaration
-%type <tval> expression_list
-%type <tval> declarations
+%type <tval> procedure_statement
+%type <tval> variable
+%type <tval> ifelse
+%type <tval> conditions
+%type <tval> subprogram_head
 %type <tval> subprogram_declarations
 %type <tval> subprogram_declaration
 
+%type <tval> statement
+%type <tval> optional_statements
+%type <tval> compound_statement
+%type <tval> statement_list
+
+%type <lval> arguments
+%type <lval> declarations
+%type <lval> parameter_list
 %type <lval> identifier_list
 
-%type <cval> sign
+%type <type> standard_type
 
+%type <cval> sign
 
 %%
 
@@ -84,30 +100,40 @@ program:
 	compound_statement
 	'.'
 	{
-		$$ = make_program(PROGRAM,make_id(scope_insert(top_scope,$2),$3,$7,$8,$9);
+		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
+		//print_tree(make_treeFromList(DECLIST,$8),0);
 		top_scope = scope_pop(top_scope);
+		print_tree($$,0);
 	}
 	;
 
 identifier_list
 	: ID
 		{
-			$$ = make_list(scope_insert(top_scope,$1),ID,ID);
+			//insert ID into scope
+			$$ = make_list_node(temp=scope_insert(top_scope,$1),$1,IDLIST);
+			//$$ = make_id(scope_insert(top_scope,$1));
 			//temp->type=ID;
 		}
 	| identifier_list ',' ID
 		{
-			$$ = list_append_node($1,scope_insert(top_scope,$3));
+			//insert ID into scope
+			$$ = list_append_node($1,temp=scope_insert(top_scope,$3));
+			//$$ = make_tree(IDLIST,$1,scope_insert(top_scope,$1));
 			//temp->type=ID;
-			//append_list($$,$3); 
 		}
 	;
 
 declarations
 	: declarations VAR identifier_list ':' type ';'
 		{
+			//set the types of the id list and set the mark to local
 			//set_names($3,$5,LOCAL);
-			$$ = make_decl(VAR,$1,make_idlist(IDLIST,$3),$5,LOCAL); 
+			//$$ = make_decl(DECLIST,make_idlist(IDLIST,$3),$5,LOCAL);
+			assign_type($3,$5);
+			assign_mark($3,LOCAL);
+			//make list of identifier list and append id list to the declarations list
+			$$ = list_append(DECLIST,$1,$3);
 		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
@@ -115,19 +141,20 @@ declarations
 
 type 
 	: standard_type
-		{ $$ = $1; }
+		{ $$ = make_tree($1,NULL,NULL); }
 	| ARRAY '[' INUM DOTDOT INUM ']' OF standard_type
 		{ 
-			$$ = make_array(ARRAY,make_inum(INUM),make_inum(INUM),$8); 
+			//make sure the ID knows the range of the array
+			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree($8,make_inum(INUM),make_inum(INUM))); 
 		}
 	;
 
 standard_type
-	: INTEGER 	{ $$ = make_tree(INTEGER,NULL,NULL); }
-	| REAL		{ $$ = make_tree(REAL,NULL,NULL); }
-	| CHAR    	{ $$ = make_tree(CHAR,NULL,NULL); }
-	| STRING	{ $$ = make_tree(STRING,NULL,NULL); }
-	| BOOLEAN	{ $$ = make_tree(BOOLEAN,NULL,NULL); }
+	: INTEGER 	{ $$ = INTEGER; }
+	| REAL		{ $$ = REAL; }
+	| CHAR    	{ $$ = CHAR; }
+	| STRING	{ $$ = STRING; }
+	| BOOLEAN	{ $$ = BOOLEAN; }
 	;
 
 subprogram_declarations
@@ -138,22 +165,42 @@ subprogram_declarations
 	;
 
 subprogram_declaration
-	: subprogram_head declarations compound_statement
+	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
 			top_scope = scope_pop(top_scope); 
-			$$ = make_subdecl(SUBPROGDECL,$1,$2,$3);
+			$$ = make_tree(SUBPROGDECL,$1,make_tree(SUBPROGDECL,$2,$3));
 		}
 	;
 
 subprogram_head
 	: FUNCTION ID 
-		{	top_scope = scope_push(top_scope,"FUNCTION"); }
+		{	
+			//insert ID into scope
+			assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL);
+			temp=scope_insert(top_scope,$2); 
+			temp->mark=FUNCTION;
+
+		}
 			arguments ':' standard_type ';'
-		{	$$ = make_function(FUNCTION,make_id(scope_insert(top_scope,ID)),$3,$5);}
+		{
+			temp->type=$6;
+			temp->list=$4;
+			$$ = make_tree(FUNCTION,make_id(temp),make_treeFromList(ARGLIST,$4));
+		}
 	| PROCEDURE ID 
-		{	top_scope = scope_push(top_scope,"PROCEDURE"); }
+		{	
+			//insert ID into scope
+			assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL);
+			temp=scope_insert(top_scope,$2); 
+			temp->type=PROCEDURE;
+			temp->mark=PROCEDURE;
+
+		}
 		arguments ';'
-		{ $$ = make_procedure(PROCEDURE,make_id(scope_insert(top_scope,ID)),$3); }
+		{ 
+			temp->list=$4;
+			$$ = make_tree(PROCEDURE,make_id(temp),make_treeFromList(ARGLIST,$4)); 
+		}
 	;
 
 arguments
@@ -166,13 +213,21 @@ arguments
 parameter_list
 	: identifier_list ':' type
 		{ 
+			//set the types of the id list and mark then as paramters
 			//set_names($1,$3,PARAMETER);
-			$$ = make_parlist(LIST,make_idlist(IDLIST,$1),$3,PARAMETER); 
+			assign_type($1,$3);
+			assign_mark($1,PARAMETER);
+			//make list of parameters
+			$$ = make_list(PARALIST,$1); 
 		}
 	| parameter_list ';' identifier_list ':' type
 		{ 	
+			//set the types of the id list and mark then as paramters
 			//set_names($3,$5,PARAMETER);
-			$$ = parlist_list(LIST,$1,make_idlist(IDLIST,$3),$5,PARAMETER); 
+			assign_type($3,$5);
+			assign_mark($3,PARAMETER);
+			//make list of identifier list and append id list to the parameter list
+			$$ = list_append(PARALIST,$1,$3); 
 		}
 	;
 
@@ -185,14 +240,16 @@ optional_statements
 	: statement_list
 		{ $$ = $1; }
 	| /* empty */	
-		{ $$ = make_tree(EMTPY,NULL,NULL); }
+		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
 
 statement_list
 	: statement
-		{ $$ = $1; }
+		//make list of statements
+		{ $$ = $1; }//make_list_tree($1,"STATLIST",STATLIST); }
 	| statement_list ';' statement
-		{ $$ = make_tree(LIST,$1,$3); }
+		//make list of statement then append the list of statements
+		{ $$ = make_tree(STATLIST,$1,$3); }
 	;
 
 statement
@@ -205,28 +262,32 @@ statement
 conditions
 	: variable ASSIGNOP expression
 		{ 
-			if(type($1)!=type($3)) fprintf(stderr,"Line: %d: Type Mismatch: \n",line_number);
-			$$ = make_op(ASSIGNOP,$2,$1,$3); 
+			//check type of varibale == type of expression
+			if(type($1)!=type($3)){ fprintf(stderr,"Type Mismatch: \n"); }
+			$$ = make_tree(ASSIGNOP,$1,$3); 
 		}
 	| procedure_statement
 		{ $$ = $1; }
 	| compound_statement
-		{ $$ = $1; }
+		{ $$ = $1; }//make_treeFromList(COMPSTAT,$1); }
 	| IF expression THEN statement ELSE statement
 		{ 
-			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
-			$$ = make_cond(CONDITIONAL,$2,$4,$6); 
+			//check type of expression for boolean
+			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); } 
+			$$ = make_tree(IF,$2,make_tree(THEN,$4,$6)); 
 		}
 	| WHILE expression DO statement
 		{ 
-			if(type($2)!=BOOLEAN) { fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  }
-			$$ = make_tree(WHILE_DO,$1,$2); 
+			//check if expression is type boolean
+			if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
+			$$ = make_tree(WHILE_DO,$2,$4); 
 		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
 		{	
+			//check if type of temp is type of expression before TO and type temp is type of expression after TO
 			temp=scope_search(top_scope,$2);
-			if(type(make_id(temp))!=type($4)) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
-			if(type(make_id(temp))!=type($6)) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number);  
+			if(type(make_id(temp))!=type($4)){ fprintf(stderr,"Boolean Error: \n"); } 
+			if(type(make_id(temp))!=type($6)){ fprintf(stderr,"Boolean Error: \n"); }
 			$$ = make_tree(FOR,make_id(temp),make_tree(DO,make_tree(TO,$4,$6),$8));
 		}
 	;
@@ -234,12 +295,14 @@ conditions
 ifelse
 	: IF expression THEN statement
 		{
-			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: TBoolean Error: \n",line_number); print_tree($2,0); 
+			//check type of expresion is boolean
+			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
 			$$ = make_tree(IF,$2,$4);
 		}
 	| IF expression THEN conditions ELSE ifelse
 		{
-			if(type($2)!=BOOLEAN) fprintf(stderr,"Line: %d: Boolean Error: \n",line_number); print_tree($2,0); 
+			//check type of expression is boolean
+			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
 			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
 		}
 	;
@@ -258,11 +321,13 @@ variable
 procedure_statement
 	: ID
 	 	{ 
+	 		//search ID and check if valid procedure call
 	 		$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),NULL); 
 	 		check_procedure($$,PROCEDURE);
 	 	}
 	| ID '(' expression_list ')'
-		{ 
+		{
+			//search ID and check if valid procedure call
 			$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),$3); 
 			check_procedure($$,PROCEDURE);
 		}
@@ -272,7 +337,7 @@ expression_list
 	: expression
 		{ $$ = $1; }
 	| expression_list ',' expression
-		{ $$ = make_tree(LIST,$1,$3); }
+		{ $$ = make_tree(EXPRLIST,$1,$3); }
 	;
 
 expression
@@ -285,8 +350,8 @@ expression
 simple_expression
 	: term
 		{ $$ = $1; }
-	| ADDOP term
-		{ $$ = make_tree(ADDOP,$1,$2); }
+	| sign term
+		{ $$ = make_op(ADDOP,$1,$2,NULL); }
 	| simple_expression ADDOP term
 		{ $$ = make_op(ADDOP,$2,$1,$3); }
 	;
@@ -302,25 +367,27 @@ factor
 	: ID { 	
 			if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
-					exit(1);
-				}
-					$$ = make_id(tmp); 
-				}
+				exit(1);
+			}
+			$$ = make_id(temp); 
+		}
 	| ID '(' expression_list ')' 
 		{
+			//check if valid function call
 			if((temp=scope_search_all(top_scope,$1)) == NULL){
-						fprintf(stderr,"Name %s used but not defined\n",$1);
-						exit(1);
-					}
+				fprintf(stderr,"Name %s used but not defined\n",$1);
+				exit(1);
+			}
 			$$ = make_tree(FUNCTION_CALL,make_id(temp),$3);
 			check_function($$,FUNCTION); 
 		}
 	| ID '[' expression_list ']' 
 		{ 
+			//check if valid array access
 			if((temp=scope_search_all(top_scope,$1)) == NULL){
-						fprintf(stderr,"Name %s used but not defined\n",$1);
-						exit(1);
-					}
+				fprintf(stderr,"Name %s used but not defined\n",$1);
+				exit(1);
+			}
 			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3); 
 			check_array($$,ARRAY_ACCESS);
 		}
@@ -334,16 +401,18 @@ factor
 		{ $$ = make_tree(NOT,$2,NULL); }
 	;
 
-
+sign : '+' { $$ = '+'; }
+     | '-' { $$ = '-'; }
+     ;
 
 %%
 
 
 scope_t *top_scope;
 node_t *temp;
-main(){
+int main(){
 	top_scope=NULL;
-	tmp=NULL;
+	temp=NULL;
 	yyparse();
 }
 

@@ -1,5 +1,0 @@
-program main (input);
-	var a,b,c: integer;
-begin 
-	a := 13 + b * c
-end.
