@@ -148,15 +148,18 @@ void print_tree(tree_t *t, int spaces){
 			break;
 		case IDLIST: 
 			fprintf(stderr, "IDLIST:");
-			list_print(t->attribute.lval);
+			id_list(t->attribute.lval);
+			fprintf(stderr, "\n");
 			break;
 		case ARGLIST: 
 			fprintf(stderr, "ARGLIST:");
 			list_print(t->attribute.lval);
+			fprintf(stderr, "\n");
 			break;
 		case DECLIST: 
 			fprintf(stderr, "DECLIST:");
 			list_print(t->attribute.lval);
+			fprintf(stderr, "\n");
 			break;
 		case PROGRAM:
 			fprintf(stderr, "PROGRAM:");
@@ -179,7 +182,15 @@ void list_print(list_t *head){
 	for(ls=head;ls!=NULL;ls=ls->next){
 		print_id(ls->node->name);
 		print_mark(ls->node->mark);
-		print_opval(ls->node->type);
+		print_type(ls->node->type);
+	}
+}
+
+void id_list(list_t *head){
+	assert(head!=NULL);
+	list_t *ls=NULL;
+	for(ls=head;ls!=NULL;ls=ls->next){
+		print_id(ls->node->name);
 	}
 }
 
@@ -190,10 +201,23 @@ void print_id(char *name){
 void print_mark(int mark){
 	switch(mark){
 		case LOCAL:
-			fprintf(stderr, "LOCAL ");
+			fprintf(stderr, " LOCAL ");
 			break;
 		case PARAMETER:
-			fprintf(stderr, "PARAMETER ");
+			fprintf(stderr, " PARAMETER ");
+			break;
+		default:
+			fprintf(stderr, "[UNKOWN]");
+	}
+}
+
+void print_type(int type){
+	switch(type){
+		case INTEGER:
+			fprintf(stderr, " INTEGER]");
+			break;
+		case REAL:
+			fprintf(stderr, " REAL]");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
@@ -203,46 +227,46 @@ void print_mark(int mark){
 void print_opval(int opval){
 	switch(opval){
 		case OR:
-			fprintf(stderr, "[ADDOP: or\n");
+			fprintf(stderr, "[ADDOP: or]\n");
 			break;
 		case PLUS:
-			fprintf(stderr, "[ADDOP: +\n");
+			fprintf(stderr, "[ADDOP: +]\n");
 			break;
 		case MINUS:
-			fprintf(stderr, "[ADDOP: -\n");
+			fprintf(stderr, "[ADDOP: -]\n");
 			break;
 		case AND:
-			fprintf(stderr, "[MULLOP: and\n");
+			fprintf(stderr, "[MULLOP: and]\n");
 			break;
 		case STAR:
-			fprintf(stderr, "[MULLOP: *\n");
+			fprintf(stderr, "[MULLOP: *]\n");
 			break;
 		case SLASH:
-			fprintf(stderr, "[MULLOP: /\n");
+			fprintf(stderr, "[MULLOP: /]\n");
 			break;
 		case DIV:
-			fprintf(stderr, "[MULLOP: div\n");
+			fprintf(stderr, "[MULLOP: div]\n");
 			break;
 		case MOD:
-			fprintf(stderr, "[MULLOP: mod\n");
+			fprintf(stderr, "[MULLOP: mod]\n");
 			break;
 		case LT:
-			fprintf(stderr, "[RELOP: <\n");
+			fprintf(stderr, "[RELOP: <]\n");
 			break;
 		case LE:
-			fprintf(stderr, "[RELOP: <=\n");
+			fprintf(stderr, "[RELOP: <=]\n");
 			break;
 		case GT:
-			fprintf(stderr, "[RELOP: >\n");
+			fprintf(stderr, "[RELOP: >]\n");
 			break;
 		case GE:
-			fprintf(stderr, "[RELOP: =>\n");
+			fprintf(stderr, "[RELOP: =>]\n");
 			break;
 		case EQ:
-			fprintf(stderr, "[RELOP: =\n");
+			fprintf(stderr, "[RELOP: =]\n");
 			break;
 		case NEQ:
-			fprintf(stderr, "[RELOP: <>\n");
+			fprintf(stderr, "[RELOP: <>]\n");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");

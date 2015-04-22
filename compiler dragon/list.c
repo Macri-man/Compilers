@@ -28,8 +28,8 @@ list_t *list_append(list_t *head,list_t *list){
 		temp=list;
 	}else{
 		assert(head!=NULL && list!=NULL);
-		for(temp=head;temp!=NULL;temp=temp->next);
-		temp=list;
+		for(temp=head;temp->next!=NULL;temp=temp->next);
+		temp->next=list;
 	}
 	assert(temp!=NULL);
 	return temp;
@@ -37,11 +37,11 @@ list_t *list_append(list_t *head,list_t *list){
 
 list_t *list_append_node(list_t *list,node_t *node){
 	assert(list!=NULL && node!=NULL);
-	list_t *p=make_list_node(node,node->name,node->type);
+	list_t *ls=make_list_node(node,node->name,node->type);
 	list_t *temp=NULL;
-	for(temp=list;temp!=NULL;temp=temp->next);
-	temp=p;
-	return temp;
+	for(temp=list;temp->next!=NULL;temp=temp->next);
+	temp->next=ls;
+	return list;
 }
 
 int num_list(list_t *head){

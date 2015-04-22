@@ -47,6 +47,8 @@ tree_t *make_idlist(int type,struct list_s *idlist);
 
 
 void list_print(struct list_s *l);
+void id_list(struct list_s *head);
+void print_type(int type);
 
 
 void assign_mark(struct list_s *l,int mark);
