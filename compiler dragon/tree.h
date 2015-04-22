@@ -43,11 +43,21 @@ tree_t *parlist_list(int type,tree_t *parlist,tree_t *idlist,tree_t *ttype,int m
 tree_t *make_treeFromList(int type,struct list_s *ls);
 tree_t *make_idlist(int type,struct list_s *idlist);
 
+
+
+
+void list_print(struct list_s *l);
+
+
 void assign_mark(struct list_s *l,int mark);
 void assign_type(struct list_s *l,tree_t *ttype);
 void assign_range(struct list_s *l,int ivalfirst,int ivallast);
 
-void print_tree(tree_t *t, int spaces); 
+void print_mark(int mark);
+void print_id(char *name);
+void print_opval(int opval); 
+
+void print_tree(tree_t *t, int spaces);
 void print_ADDOP(int opval);
 void print_MULOP(int opval);
 void print_RELOP(int opval);

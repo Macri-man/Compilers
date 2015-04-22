@@ -105,6 +105,7 @@ program:
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
 		//print_tree(make_treeFromList(DECLIST,$8),0);
 		top_scope = scope_pop(top_scope);
+		fprintf(stderr,"\n\n\n");
 		print_tree($$,0);
 	}
 	;

@@ -35,14 +35,6 @@ list_t *list_append(list_t *head,list_t *list){
 	return temp;
 }
 
-void list_print(list_t *head){
-	assert(head!=NULL);
-	list_t *ls=NULL;
-	for(ls=head;ls!=NULL;ls=ls->next){
-		fprintf(stderr, "Name: %s Type: %d Mark: %d \n\n",ls->node->name,ls->node->type,ls->node->mark);
-	}
-}
-
 list_t *list_append_node(list_t *list,node_t *node){
 	assert(list!=NULL && node!=NULL);
 	list_t *p=make_list_node(node,node->name,node->type);

@@ -135,16 +135,16 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[RNUM:%f\n",t->attribute.rval);
 			break;
 		case ADDOP:
-			print_ADDOP(t->attribute.opval);
+			print_opval(t->attribute.opval);
 			break;
 		case MULOP: 
-			print_MULOP(t->attribute.opval);
+			print_opval(t->attribute.opval);
 			break;
 		case RELOP: 
-			print_RELOP(t->attribute.opval);
+			print_opval(t->attribute.opval);
 			break;
 		case LIST: 
-			fprintf(stderr, "LIST:");
+			//fprintf(stderr, "LIST:");
 			break;
 		case IDLIST: 
 			fprintf(stderr, "IDLIST:");
@@ -158,18 +158,49 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "DECLIST:");
 			list_print(t->attribute.lval);
 			break;
+		case PROGRAM:
+			fprintf(stderr, "PROGRAM:");
+			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
 	//fprintf(stderr, "\n");
 	/* go left */
-	print_tree(t->left,spaces+4);
+	print_tree(t->left,spaces+2);
 	/*go right */
-	print_tree(t->right,spaces+4);
+	print_tree(t->right,spaces+2);
 
 }
 
-void print_ADDOP(int opval){
+
+void list_print(list_t *head){
+	assert(head!=NULL);
+	list_t *ls=NULL;
+	for(ls=head;ls!=NULL;ls=ls->next){
+		print_id(ls->node->name);
+		print_mark(ls->node->mark);
+		print_opval(ls->node->type);
+	}
+}
+
+void print_id(char *name){
+	fprintf(stderr, "[ID:%s ",name);
+}
+
+void print_mark(int mark){
+	switch(mark){
+		case LOCAL:
+			fprintf(stderr, "LOCAL ");
+			break;
+		case PARAMETER:
+			fprintf(stderr, "PARAMETER ");
+			break;
+		default:
+			fprintf(stderr, "[UNKOWN]");
+	}
+}
+
+void print_opval(int opval){
 	switch(opval){
 		case OR:
 			fprintf(stderr, "[ADDOP: or\n");
@@ -180,13 +211,6 @@ void print_ADDOP(int opval){
 		case MINUS:
 			fprintf(stderr, "[ADDOP: -\n");
 			break;
-		default:
-			fprintf(stderr, "[UNKOWN]");
-	}
-}
-
-void print_MULOP(int opval){
-	switch(opval){
 		case AND:
 			fprintf(stderr, "[MULLOP: and\n");
 			break;
@@ -202,13 +226,6 @@ void print_MULOP(int opval){
 		case MOD:
 			fprintf(stderr, "[MULLOP: mod\n");
 			break;
-		default:
-			fprintf(stderr, "[UNKOWN]");
-	}
-}
-
-void print_RELOP(int opval){
-	switch(opval){
 		case LT:
 			fprintf(stderr, "[RELOP: <\n");
 			break;
@@ -231,5 +248,3 @@ void print_RELOP(int opval){
 			fprintf(stderr, "[UNKOWN]");
 	}
 }
-
-
