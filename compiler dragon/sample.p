@@ -18,9 +18,9 @@ program main( input, output );
 		var r: real;
 		var t: integer;
         begin
-        	t := gcd(0,0);
+        	t := gcd ( 0 , 0 );
             if a < b then 
-                gcdtwo := gcdtwo( b, a )
+                gcdtwo := gcdtwo( b , a )
             else if b = 0 then
                 gcdtwo := a
             else
@@ -32,8 +32,8 @@ program main( input, output );
     begin
     	a := 5;
     	b := 10;
-        read(a);
-        c := gcd(a,b);
-        x := gcdtwo(y,z);
+        read( a );
+        c := gcd ( a , b );
+        x := gcdtwo( y , z );
         writeln(c)
     end.

@@ -21,6 +21,8 @@ node_t *scope_insert(scope_t *head,char *name);
 
 node_t *scope_search_all(scope_t *head,char *name);
 
+void print_scope(scope_t *top);
+
 /* symbol table = stack of hash tables; stack routins */
 scope_t *scope_push(scope_t *top,char *name);
 scope_t *scope_pop(scope_t *top);

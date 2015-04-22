@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "scope.h"
 
@@ -71,6 +72,13 @@ scope_t *scope_pop(scope_t *top){
 
 		return top;
 	}else return NULL;
+}
+
+void print_scope(scope_t *top){
+	node_t *temp=NULL;
+	for(temp=top->table;temp!=NULL;temp=temp->next){
+		fprintf(stderr, "%s\n",temp->name);
+	}
 }
 
 /* hash function (Weinberger's hash)*/

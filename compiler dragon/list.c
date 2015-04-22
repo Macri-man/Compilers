@@ -17,7 +17,7 @@ list_t *make_list_node(node_t *node,char *name,int type){
 list_t *make_list(list_t *list){
 	assert(list!=NULL);
 	list_t *p=(list_t*)malloc(sizeof(list_t));
-	p->next=list;
+	p=list;
 	return p;
 }
 

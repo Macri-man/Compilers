@@ -56,9 +56,9 @@
 %token WHILE DO FOR TO
 
 %token EMTPY CONDITIONAL TYPE
-%token LIST ARRAY_ACCESS STATEMENT
+%token LIST ARRAY_ACCESS ARRAY_RANGE STATEMENT
 %token FUNCTION_CALL PROCEDURE_CALL
-%token WHILE_DO DECL SUBDECL SUBPROGDECL
+%token WHILE_DO DECL SUBDECL SUBDECLS SUBPROGDECL SUBPROGDECLHEAD
 %token LOCAL PARAMETER IDLIST EXPR EXPRLIST PARALIST ARGLIST DECLIST STATLIST PROCSTAT COMPSTAT
 
 %type <tval> program
@@ -148,7 +148,7 @@ type
 	| ARRAY '[' INUM DOTDOT INUM ']' OF standard_type
 		{ 
 			//make sure the ID knows the range of the array
-			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree(TYPE,make_inum(INUM),make_inum(INUM))); 
+			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree(ARRAY_RANGE,make_inum(INUM),make_inum(INUM))); 
 		}
 	;
 
@@ -159,7 +159,7 @@ standard_type
 
 subprogram_declarations
 	: subprogram_declarations subprogram_declaration ';'
-		{ $$ = make_tree(SUBDECL,$1,$2); }
+		{ $$ = make_tree(SUBDECLS,$1,$2); }
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
@@ -168,38 +168,38 @@ subprogram_declaration
 	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
 			top_scope = scope_pop(top_scope); 
-			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECL,make_treeFromList(DECLIST,$2),make_tree(SUBPROGDECL,$3,$4)));
+			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECLHEAD,make_treeFromList(DECLIST,$2),make_tree(SUBDECLS,$3,make_tree(COMPSTAT,$4,NULL))));
 		}
 	;
 
-subprogram_head
-	: FUNCTION ID 
+subprogram_head:
+	{ assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL); }
+	FUNCTION ID 
 		{	
 			//insert ID into scope
-			assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL);
-			temp=scope_insert(top_scope,$2); 
-			temp->mark=FUNCTION;
-
+			temp=scope_insert(top_scope,$3); 
 		}
 			arguments ':' standard_type ';'
 		{
-			temp->type=$6;
-			temp->args=$4;
-			$$ = make_tree(FUNCTION,make_id(temp),make_treeFromList(ARGLIST,$4));
+			temp->mark=FUNCTION;
+			temp->type=$7;
+			temp->args=$5;
+			$$ = make_tree(FUNCTION,make_id(temp),make_treeFromList(ARGLIST,$5));
 		}
-	| PROCEDURE ID 
+	| 	
+		{ assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL); }
+		PROCEDURE ID 
 		{	
 			//insert ID into scope
-			assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL);
-			temp=scope_insert(top_scope,$2); 
+			temp=scope_insert(top_scope,$3); 
 			temp->type=PROCEDURE;
 			temp->mark=PROCEDURE;
 
 		}
 		arguments ';'
 		{ 
-			temp->args=$4;
-			$$ = make_tree(PROCEDURE,make_id(temp),make_treeFromList(ARGLIST,$4)); 
+			temp->args=$5;
+			$$ = make_tree(PROCEDURE,make_id(temp),make_treeFromList(ARGLIST,$5)); 
 		}
 	;
 
@@ -263,7 +263,7 @@ conditions
 	: variable ASSIGNOP expression
 		{ 
 			//check type of varibale == type of expression
-			if(type($1)!=type($3)){ fprintf(stderr,"Type Mismatch: \n"); }
+			//if(type($1)!=type($3)){ fprintf(stderr,"Type Mismatch: \n"); }
 			$$ = make_tree(ASSIGNOP,$1,$3); 
 		}
 	| procedure_statement
@@ -273,21 +273,21 @@ conditions
 	| IF expression THEN statement ELSE statement
 		{ 
 			//check type of expression for boolean
-			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); } 
+			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); } 
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,$6)); 
 		}
 	| WHILE expression DO statement
 		{ 
 			//check if expression is type boolean
-			if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
+			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
 			$$ = make_tree(WHILE_DO,$2,$4); 
 		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
 		{	
 			//check if type of temp is type of expression before TO and type temp is type of expression after TO
 			temp=scope_search(top_scope,$2);
-			if(type(make_id(temp))!=type($4)){ fprintf(stderr,"Boolean Error: \n"); } 
-			if(type(make_id(temp))!=type($6)){ fprintf(stderr,"Boolean Error: \n"); }
+			//if(type(make_id(temp))!=type($4)){ fprintf(stderr,"Boolean Error: \n"); } 
+			//if(type(make_id(temp))!=type($6)){ fprintf(stderr,"Boolean Error: \n"); }
 			$$ = make_tree(FOR,make_id(temp),make_tree(DO,make_tree(TO,$4,$6),$8));
 		}
 	;
@@ -296,26 +296,29 @@ ifelse
 	: IF expression THEN statement
 		{
 			//check type of expresion is boolean
-			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
+			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
 			$$ = make_tree(IF,$2,$4);
 		}
-	| IF expression THEN conditions ELSE ifelse
+	| IF expression THEN ifelse ELSE conditions
 		{
 			//check type of expression is boolean
-			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
+			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
 			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
 		}
-	| compound_statement
-		{ $$ = $1; }//make_treeFromList(COMPSTAT,$1); }
 	;
 
 
 variable
 	: ID
-		{ $$ = make_id(scope_search(top_scope,$1)); }
+		{ $$ = make_id(temp=scope_search(top_scope,$1));
+			fprintf(stderr,"[SCOPE: %s]",top_scope->name);
+			print_scope(top_scope);
+			//assert(temp!=NULL);
+		}
 	| ID '[' expression ']'
 		{ 
-			$$ = make_tree(ARRAY_ACCESS,make_id(scope_search(top_scope,$1)),$3);
+			$$ = make_tree(ARRAY_ACCESS,make_id(temp=scope_search(top_scope,$1)),$3);
+			//assert(temp!=NULL);
 			check_array($$,ARRAY_ACCESS); 
 		}
 	;

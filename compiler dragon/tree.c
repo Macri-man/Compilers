@@ -143,26 +143,95 @@ void print_tree(tree_t *t, int spaces){
 		case RELOP: 
 			print_opval(t->attribute.opval);
 			break;
+		case ASSIGNOP: 
+			fprintf(stderr, "[ASSIGNOP: \n");
+			break;
+		case WHILE: 
+			fprintf(stderr, "[WHILE: \n");
+			break;
+		case DO: 
+			fprintf(stderr, "[DO: \n");
+			break;
+		case FOR: 
+			fprintf(stderr, "[FOR: \n");
+			break;
+		case TO: 
+			fprintf(stderr, "[TO: \n");
+			break;
+		case IF: 
+			fprintf(stderr, "[IF: \n");
+			break;
+		case THEN: 
+			fprintf(stderr, "[THEN: \n");
+			break;
+		case ELSE: 
+			fprintf(stderr, "[ELSE: \n");
+			break;
+		case NOT: 
+			fprintf(stderr, "[NOT:");
+			break;
+		case INTEGER: 
+			fprintf(stderr, "[INTEGER:");
+			break;
+		case REAL: 
+			fprintf(stderr, "[REAL:");
+			break;
+		case ARRAY: 
+			fprintf(stderr, "[ARRAY:");
+			break;
+		case ARRAY_ACCESS: 
+			fprintf(stderr, "[ARRAY ACCESS:");
+			break;
+		case ARRAY_RANGE: 
+			fprintf(stderr, "[ARRAY RANGE:");
+			break;
+		case FUNCTION: 
+			fprintf(stderr, "[FUNCTION: ");
+			break;
+		case PROCEDURE: 
+			fprintf(stderr, "[PROCEDURE: ");
+			break;
+		case EXPRLIST: 
+			fprintf(stderr, "[EXPRESSION LIST: \n");
+			break;
+		case STATLIST: 
+			fprintf(stderr, "[STATEMENT LIST: \n");
+			break;
+		case COMPSTAT: 
+			fprintf(stderr, "[COMPOUND STATEMENTS: \n");
+			break;
 		case LIST: 
 			//fprintf(stderr, "LIST:");
 			break;
 		case IDLIST: 
-			fprintf(stderr, "IDLIST:");
+			fprintf(stderr, "[IDLIST:");
 			id_list(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
 		case ARGLIST: 
-			fprintf(stderr, "ARGLIST:");
+			fprintf(stderr, "[ARGLIST:");
 			list_print(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
 		case DECLIST: 
-			fprintf(stderr, "DECLIST:");
+			fprintf(stderr, "[DECLIST:");
 			list_print(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
+		case SUBDECLS: 
+			fprintf(stderr, "[SUBPROGRAM DECLCLARATIONS: \n");
+			break;
+		case SUBDECL: 
+			fprintf(stderr, "[SUBPROGRAM DECLCLARATION: \n");
+			break;
+		case SUBPROGDECL: 
+			fprintf(stderr, "[SUBPROGRAM DECLCLARATION: \n");
+			break;
+		case SUBPROGDECLHEAD: 
+			fprintf(stderr, "[SUBPROGRAM DECLCLARATION HEAD: \n");
+			break;
 		case PROGRAM:
-			fprintf(stderr, "PROGRAM:");
+			fprintf(stderr, "[PROGRAM:");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
