@@ -1,66 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "list.h"
 
 list_t *make_list_node(node_t *node,char *name,int type){
+	assert(node!=NULL);
 	list_t *p=(list_t*)malloc(sizeof(list_t));
-	p->attribute.node=node;
+	p->node=node;
 	p->name=strdup(name);
 	p->type=type;
 	p->next=NULL;
 	return p;
 }
 
-list_t *make_list_tree(tree_t *tree,char *name,int type){
+list_t *make_list(list_t *list){
+	assert(list!=NULL);
 	list_t *p=(list_t*)malloc(sizeof(list_t));
-	p->attribute.tree=tree;
-	p->name=strdup(name);
-	p->type=type;
-	p->next=NULL;
-	return p;
-}
-
-list_t *make_list(int type,list_t *list){
-	list_t *p=(list_t*)malloc(sizeof(list_t));
-	p->attribute.lval=list;
-	p->type=type;
 	p->next=list;
 	return p;
 }
 
-list_t *list_append(int type,list_t *head,list_t *list){
-	list_t *p=make_list(list->type,list);
-	head->type=type;
+list_t *list_append(list_t *head,list_t *list){
+	assert(list!=NULL);
 	list_t *temp=NULL;
-	for(temp=head;temp!=NULL;temp=temp->next);
-	temp->next=p;
+	if(head==NULL){
+		temp=list;
+	}else{
+		assert(head!=NULL && list!=NULL);
+		for(temp=head;temp!=NULL;temp=temp->next);
+		temp=list;
+	}
+	assert(temp!=NULL);
 	return temp;
 }
 
 void list_print(list_t *head){
-	list_t *p=NULL;
-	for(p=head;p!=NULL;p=p->next){
-		print_tree(p,0);
-		fprintf(stderr, "\n\n");
+	assert(head!=NULL);
+	list_t *ls=NULL;
+	for(ls=head;ls!=NULL;ls=ls->next){
+		fprintf(stderr, "Name: %s Type: %d Mark: %d \n\n",ls->node->name,ls->node->type,ls->node->mark);
 	}
 }
 
 list_t *list_append_node(list_t *list,node_t *node){
+	assert(list!=NULL && node!=NULL);
 	list_t *p=make_list_node(node,node->name,node->type);
 	list_t *temp=NULL;
 	for(temp=list;temp!=NULL;temp=temp->next);
-	temp->next=p;
+	temp=p;
 	return temp;
 }
 
-list_t *list_append_tree(list_t *head,tree_t *tree){
-	list_t *p=make_list_tree(tree,tree->attribute.sval->name,tree->type);
-	head->next=p;
-	return head;
-}
-
 int num_list(list_t *head){
+	assert(head!=NULL);
 	int num=0;
 	list_t *temp=NULL;
 	for(temp=head;temp!=NULL;temp=temp->next){

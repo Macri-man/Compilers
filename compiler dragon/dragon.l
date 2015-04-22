@@ -17,7 +17,7 @@ int line_number;
 ident     	[a-zA-Z][a-zA-Z0-9]*
 num      	[0-9]+
 whitespace 	[ \t]+
-comment     \{\*.*\*\}
+comment     \(\*.*\*\)
 
 
 %%

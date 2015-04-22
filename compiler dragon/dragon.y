@@ -29,7 +29,7 @@
 	tree_t *tval;
 	list_t *lval;
 
-	int type;
+	int ptype;
 }
 
 %token NUMBER 
@@ -81,12 +81,14 @@
 %type <tval> compound_statement
 %type <tval> statement_list
 
+
+%type <ptype> standard_type
+
+
 %type <lval> arguments
 %type <lval> declarations
 %type <lval> parameter_list
 %type <lval> identifier_list
-
-%type <type> standard_type
 
 %type <cval> sign
 
@@ -133,7 +135,7 @@ declarations
 			assign_type($3,$5);
 			assign_mark($3,LOCAL);
 			//make list of identifier list and append id list to the declarations list
-			$$ = list_append(DECLIST,$1,$3);
+			$$ = list_append($1,$3);
 		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
@@ -145,16 +147,13 @@ type
 	| ARRAY '[' INUM DOTDOT INUM ']' OF standard_type
 		{ 
 			//make sure the ID knows the range of the array
-			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree($8,make_inum(INUM),make_inum(INUM))); 
+			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree(TYPE,make_inum(INUM),make_inum(INUM))); 
 		}
 	;
 
 standard_type
 	: INTEGER 	{ $$ = INTEGER; }
 	| REAL		{ $$ = REAL; }
-	| CHAR    	{ $$ = CHAR; }
-	| STRING	{ $$ = STRING; }
-	| BOOLEAN	{ $$ = BOOLEAN; }
 	;
 
 subprogram_declarations
@@ -168,7 +167,7 @@ subprogram_declaration
 	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
 			top_scope = scope_pop(top_scope); 
-			$$ = make_tree(SUBPROGDECL,$1,make_tree(SUBPROGDECL,$2,$3));
+			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECL,make_treeFromList(DECLIST,$2),make_tree(SUBPROGDECL,$3,$4)));
 		}
 	;
 
@@ -184,7 +183,7 @@ subprogram_head
 			arguments ':' standard_type ';'
 		{
 			temp->type=$6;
-			temp->list=$4;
+			temp->args=$4;
 			$$ = make_tree(FUNCTION,make_id(temp),make_treeFromList(ARGLIST,$4));
 		}
 	| PROCEDURE ID 
@@ -198,7 +197,7 @@ subprogram_head
 		}
 		arguments ';'
 		{ 
-			temp->list=$4;
+			temp->args=$4;
 			$$ = make_tree(PROCEDURE,make_id(temp),make_treeFromList(ARGLIST,$4)); 
 		}
 	;
@@ -218,7 +217,7 @@ parameter_list
 			assign_type($1,$3);
 			assign_mark($1,PARAMETER);
 			//make list of parameters
-			$$ = make_list(PARALIST,$1); 
+			$$ = $1; 
 		}
 	| parameter_list ';' identifier_list ':' type
 		{ 	
@@ -227,7 +226,7 @@ parameter_list
 			assign_type($3,$5);
 			assign_mark($3,PARAMETER);
 			//make list of identifier list and append id list to the parameter list
-			$$ = list_append(PARALIST,$1,$3); 
+			$$ = list_append($1,$3); 
 		}
 	;
 
@@ -305,6 +304,8 @@ ifelse
 			if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
 			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
 		}
+	| compound_statement
+		{ $$ = $1; }//make_treeFromList(COMPSTAT,$1); }
 	;
 
 
@@ -365,29 +366,29 @@ term
 
 factor
 	: ID { 	
-			if((temp=scope_search_all(top_scope,$1)) == NULL){
+			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}
+			}*/
 			$$ = make_id(temp); 
 		}
 	| ID '(' expression_list ')' 
 		{
 			//check if valid function call
-			if((temp=scope_search_all(top_scope,$1)) == NULL){
+			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}
+			}*/
 			$$ = make_tree(FUNCTION_CALL,make_id(temp),$3);
 			check_function($$,FUNCTION); 
 		}
 	| ID '[' expression_list ']' 
 		{ 
 			//check if valid array access
-			if((temp=scope_search_all(top_scope,$1)) == NULL){
+			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}
+			}*/
 			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3); 
 			check_array($$,ARRAY_ACCESS);
 		}

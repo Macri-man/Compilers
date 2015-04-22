@@ -13,7 +13,7 @@ typedef struct node_s{
 		int range[2];
 	}semantics;
 
-	struct list_s *list;
+	struct list_s *args;
 
 	struct node_s *next;
 }node_t;
