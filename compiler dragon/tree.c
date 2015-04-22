@@ -128,6 +128,14 @@ void print_tree(tree_t *t, int spaces){
 		case ID:
 			fprintf(stderr, "[ID:%s\n",(t->attribute.sval)->name);
 			break;
+		case NAME:
+			print_id(t->attribute.sval->name);
+			print_mark(t->attribute.sval->mark);
+			if(t->attribute.sval->mark==FUNCTION){
+				print_type(t->attribute.sval->type);
+			}
+			fprintf(stderr, "\n");
+			break;
 		case INUM:
 			fprintf(stderr, "[INUM:%d\n",t->attribute.ival);
 			break;
@@ -203,32 +211,32 @@ void print_tree(tree_t *t, int spaces){
 		case LIST: 
 			//fprintf(stderr, "LIST:");
 			break;
-		case IDLIST: 
+		case IDLIST:
 			fprintf(stderr, "[IDLIST:");
 			id_list(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
-		case ARGLIST: 
+		case ARGLIST:
 			fprintf(stderr, "[ARGLIST:");
 			list_print(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
-		case DECLIST: 
+		case DECLIST:
 			fprintf(stderr, "[DECLIST:");
 			list_print(t->attribute.lval);
 			fprintf(stderr, "\n");
 			break;
 		case SUBDECLS: 
-			fprintf(stderr, "[SUBPROGRAM DECLCLARATIONS: \n");
+			fprintf(stderr, "[SUBPROGRAM DECLARATIONS: \n");
 			break;
 		case SUBDECL: 
-			fprintf(stderr, "[SUBPROGRAM DECLCLARATION: \n");
+			fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
 			break;
 		case SUBPROGDECL: 
-			fprintf(stderr, "[SUBPROGRAM DECLCLARATION: \n");
+			fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
 			break;
-		case SUBPROGDECLHEAD: 
-			fprintf(stderr, "[SUBPROGRAM DECLCLARATION HEAD: \n");
+		case SUBPROGDECLBODY: 
+			fprintf(stderr, "[SUBPROGRAM DECLARATION BODY: \n");
 			break;
 		case PROGRAM:
 			fprintf(stderr, "[PROGRAM:");
@@ -274,6 +282,12 @@ void print_mark(int mark){
 			break;
 		case PARAMETER:
 			fprintf(stderr, " PARAMETER ");
+			break;
+		case FUNCTION:
+			fprintf(stderr, " FUNCTION ");
+			break;
+		case PROCEDURE:
+			fprintf(stderr, " PROCEDURE ");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");

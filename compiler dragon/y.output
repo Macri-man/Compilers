@@ -21,6 +21,7 @@ Terminals which are not used
    EMTPY
    CONDITIONAL
    TYPE
+   NAME
    LIST
    ARRAY_ACCESS
    ARRAY_RANGE
@@ -33,6 +34,7 @@ Terminals which are not used
    SUBDECLS
    SUBPROGDECL
    SUBPROGDECLHEAD
+   SUBPROGDECLBODY
    LOCAL
    PARAMETER
    IDLIST
@@ -206,92 +208,94 @@ TO (301) 36
 EMTPY (302)
 CONDITIONAL (303)
 TYPE (304)
-LIST (305)
-ARRAY_ACCESS (306)
-ARRAY_RANGE (307)
-STATEMENT (308)
-FUNCTION_CALL (309)
-PROCEDURE_CALL (310)
-WHILE_DO (311)
-DECL (312)
-SUBDECL (313)
-SUBDECLS (314)
-SUBPROGDECL (315)
-SUBPROGDECLHEAD (316)
-LOCAL (317)
-PARAMETER (318)
-IDLIST (319)
-EXPR (320)
-EXPRLIST (321)
-PARALIST (322)
-ARGLIST (323)
-DECLIST (324)
-STATLIST (325)
-PROCSTAT (326)
-COMPSTAT (327)
+NAME (305)
+LIST (306)
+ARRAY_ACCESS (307)
+ARRAY_RANGE (308)
+STATEMENT (309)
+FUNCTION_CALL (310)
+PROCEDURE_CALL (311)
+WHILE_DO (312)
+DECL (313)
+SUBDECL (314)
+SUBDECLS (315)
+SUBPROGDECL (316)
+SUBPROGDECLHEAD (317)
+SUBPROGDECLBODY (318)
+LOCAL (319)
+PARAMETER (320)
+IDLIST (321)
+EXPR (322)
+EXPRLIST (323)
+PARALIST (324)
+ARGLIST (325)
+DECLIST (326)
+STATLIST (327)
+PROCSTAT (328)
+COMPSTAT (329)
 
 
 Nonterminals, with rules where they appear
 
-$accept (83)
+$accept (85)
     on left: 0
-program (84)
+program (86)
     on left: 2, on right: 0
-@1 (85)
+@1 (87)
     on left: 1, on right: 2
-identifier_list (86)
+identifier_list (88)
     on left: 3 4, on right: 2 4 5 22 23
-declarations (87)
+declarations (89)
     on left: 5 6, on right: 2 5 13
-type (88)
+type (90)
     on left: 7 8, on right: 5 22 23
-standard_type (89)
+standard_type (91)
     on left: 9 10, on right: 7 8 16
-subprogram_declarations (90)
+subprogram_declarations (92)
     on left: 11 12, on right: 2 11 13
-subprogram_declaration (91)
+subprogram_declaration (93)
     on left: 13, on right: 11
-subprogram_head (92)
+subprogram_head (94)
     on left: 16 19, on right: 13
-@2 (93)
+@2 (95)
     on left: 14, on right: 16
-@3 (94)
+@3 (96)
     on left: 15, on right: 16
-@4 (95)
+@4 (97)
     on left: 17, on right: 19
-@5 (96)
+@5 (98)
     on left: 18, on right: 19
-arguments (97)
+arguments (99)
     on left: 20 21, on right: 16 19
-parameter_list (98)
+parameter_list (100)
     on left: 22 23, on right: 20 23
-compound_statement (99)
+compound_statement (101)
     on left: 24, on right: 2 13 33
-optional_statements (100)
+optional_statements (102)
     on left: 25 26, on right: 24
-statement_list (101)
+statement_list (103)
     on left: 27 28, on right: 25 28
-statement (102)
+statement (104)
     on left: 29 30, on right: 27 28 34 35 37
-conditions (103)
+conditions (105)
     on left: 31 32 33 34 35 36, on right: 29 36 38
-ifelse (104)
+ifelse (106)
     on left: 37 38, on right: 30 38
-variable (105)
+variable (107)
     on left: 39 40, on right: 31
-procedure_statement (106)
+procedure_statement (108)
     on left: 41 42, on right: 32
-expression_list (107)
+expression_list (109)
     on left: 43 44, on right: 42 44 53 54
-expression (108)
+expression (110)
     on left: 45 46, on right: 31 34 35 36 37 38 40 43 44 57
-simple_expression (109)
+simple_expression (111)
     on left: 47 48 49, on right: 45 46 49
-term (110)
+term (112)
     on left: 50 51, on right: 47 48 49 51
-factor (111)
+factor (113)
     on left: 52 53 54 55 56 57 58, on right: 50 51 58
-sign (112)
+sign (114)
     on left: 59 60, on right: 48
 
 

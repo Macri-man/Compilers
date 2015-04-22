@@ -15,6 +15,7 @@
 
 	extern scope_t *top_scope;
 	extern node_t *temp;
+	extern tree_t *tree;
 %}
 
 %union{
@@ -55,10 +56,10 @@
 %token IF THEN ELSE
 %token WHILE DO FOR TO
 
-%token EMTPY CONDITIONAL TYPE
+%token EMTPY CONDITIONAL TYPE NAME
 %token LIST ARRAY_ACCESS ARRAY_RANGE STATEMENT
 %token FUNCTION_CALL PROCEDURE_CALL
-%token WHILE_DO DECL SUBDECL SUBDECLS SUBPROGDECL SUBPROGDECLHEAD
+%token WHILE_DO DECL SUBDECL SUBDECLS SUBPROGDECL SUBPROGDECLHEAD SUBPROGDECLBODY
 %token LOCAL PARAMETER IDLIST EXPR EXPRLIST PARALIST ARGLIST DECLIST STATLIST PROCSTAT COMPSTAT
 
 %type <tval> program
@@ -103,10 +104,10 @@ program:
 	'.'
 	{
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
-		//print_tree(make_treeFromList(DECLIST,$8),0);
+		print_tree(make_treeFromList(DECLIST,$8),0);
 		top_scope = scope_pop(top_scope);
 		fprintf(stderr,"\n\n\n");
-		print_tree($$,0);
+		//print_tree($$,0);
 	}
 	;
 
@@ -168,7 +169,7 @@ subprogram_declaration
 	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
 			top_scope = scope_pop(top_scope); 
-			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECLHEAD,make_treeFromList(DECLIST,$2),make_tree(SUBDECLS,$3,make_tree(COMPSTAT,$4,NULL))));
+			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECLBODY,make_treeFromList(DECLIST,$2),make_tree(SUBDECLS,$3,make_tree(COMPSTAT,$4,NULL))));
 		}
 	;
 
@@ -177,21 +178,24 @@ subprogram_head:
 	FUNCTION ID 
 		{	
 			//insert ID into scope
-			temp=scope_insert(top_scope,$3); 
+			temp=scope_insert(top_scope,$3);
+			//assert(temp!=NULL); 
 		}
 			arguments ':' standard_type ';'
 		{
 			temp->mark=FUNCTION;
 			temp->type=$7;
 			temp->args=$5;
-			$$ = make_tree(FUNCTION,make_id(temp),make_treeFromList(ARGLIST,$5));
+			$$ = make_tree(FUNCTION,tree=make_id(temp),make_treeFromList(ARGLIST,$5));
+			tree->type=NAME;
 		}
 	| 	
 		{ assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL); }
 		PROCEDURE ID 
 		{	
 			//insert ID into scope
-			temp=scope_insert(top_scope,$3); 
+			temp=scope_insert(top_scope,$3);
+			//assert(temp!=NULL); 
 			temp->type=PROCEDURE;
 			temp->mark=PROCEDURE;
 
@@ -199,7 +203,8 @@ subprogram_head:
 		arguments ';'
 		{ 
 			temp->args=$5;
-			$$ = make_tree(PROCEDURE,make_id(temp),make_treeFromList(ARGLIST,$5)); 
+			$$ = make_tree(PROCEDURE,tree=make_id(temp),make_treeFromList(ARGLIST,$5)); 
+			tree->type=NAME;
 		}
 	;
 
@@ -311,8 +316,6 @@ ifelse
 variable
 	: ID
 		{ $$ = make_id(temp=scope_search(top_scope,$1));
-			fprintf(stderr,"[SCOPE: %s]",top_scope->name);
-			print_scope(top_scope);
 			//assert(temp!=NULL);
 		}
 	| ID '[' expression ']'
@@ -415,9 +418,11 @@ sign : '+' { $$ = '+'; }
 
 scope_t *top_scope;
 node_t *temp;
+tree_t *tree;
 int main(){
 	top_scope=NULL;
 	temp=NULL;
+	tree=NULL;
 	yyparse();
 }
 

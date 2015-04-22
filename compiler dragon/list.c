@@ -25,14 +25,14 @@ list_t *list_append(list_t *head,list_t *list){
 	assert(list!=NULL);
 	list_t *temp=NULL;
 	if(head==NULL){
-		temp=list;
+		head=list;
 	}else{
 		assert(head!=NULL && list!=NULL);
 		for(temp=head;temp->next!=NULL;temp=temp->next);
 		temp->next=list;
 	}
-	assert(temp!=NULL);
-	return temp;
+	assert(head !=NULL);
+	return head;
 }
 
 list_t *list_append_node(list_t *list,node_t *node){
