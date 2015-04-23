@@ -8,8 +8,8 @@ list_t *make_list_node(node_t *node,char *name,int type){
 	assert(node!=NULL);
 	list_t *p=(list_t*)malloc(sizeof(list_t));
 	p->node=node;
-	p->name=strdup(name);
-	p->type=type;
+	//p->name=strdup(name);
+	//p->type=type;
 	p->next=NULL;
 	return p;
 }

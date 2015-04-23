@@ -36,7 +36,7 @@ node_t *scope_insert(scope_t *scope,char *name){
 	node_t *head;
 
 	if(scope!=NULL){
-		hash_pjw(name);
+		index=hash_pjw(name);
 		head=scope->table[index];
 		return scope->table[index]=node_insert(head,name);
 	}else return NULL;

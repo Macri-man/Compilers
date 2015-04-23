@@ -5,9 +5,9 @@
 #include "node.h"
 
 typedef struct list_s{
-	char *name;
-	int type;
-	int mark;
+	//char *name;
+	//int type;
+	//int mark;
 	struct node_s *node;
 
 	struct list_s *next;

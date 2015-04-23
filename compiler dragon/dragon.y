@@ -104,7 +104,7 @@ program:
 	'.'
 	{
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
-		print_tree(make_treeFromList(DECLIST,$8),0);
+		print_tree($10,0);
 		top_scope = scope_pop(top_scope);
 		fprintf(stderr,"\n\n\n");
 		//print_tree($$,0);
@@ -174,36 +174,37 @@ subprogram_declaration
 	;
 
 subprogram_head:
-	{ assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL); }
 	FUNCTION ID 
 		{	
+			assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL);
 			//insert ID into scope
-			temp=scope_insert(top_scope,$3);
+			temp=scope_insert(top_scope,$2);
 			//assert(temp!=NULL); 
 		}
 			arguments ':' standard_type ';'
 		{
+			temp=scope_insert(top_scope,$2);
 			temp->mark=FUNCTION;
-			temp->type=$7;
-			temp->args=$5;
-			$$ = make_tree(FUNCTION,tree=make_id(temp),make_treeFromList(ARGLIST,$5));
+			temp->type=$6;
+			temp->args=$4;
+			$$ = make_tree(FUNCTION,tree=make_id(temp),make_treeFromList(ARGLIST,$4));
 			tree->type=NAME;
 		}
 	| 	
-		{ assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL); }
 		PROCEDURE ID 
 		{	
 			//insert ID into scope
-			temp=scope_insert(top_scope,$3);
-			//assert(temp!=NULL); 
-			temp->type=PROCEDURE;
-			temp->mark=PROCEDURE;
+			assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL);
 
 		}
 		arguments ';'
 		{ 
-			temp->args=$5;
-			$$ = make_tree(PROCEDURE,tree=make_id(temp),make_treeFromList(ARGLIST,$5)); 
+			temp=scope_insert(top_scope,$2);
+			//assert(temp!=NULL); 
+			temp->type=PROCEDURE;
+			temp->mark=PROCEDURE;
+			temp->args=$4;
+			$$ = make_tree(PROCEDURE,tree=make_id(temp),make_treeFromList(ARGLIST,$4)); 
 			tree->type=NAME;
 		}
 	;
@@ -275,13 +276,13 @@ conditions
 		{ $$ = $1; }
 	| compound_statement
 		{ $$ = $1; }//make_treeFromList(COMPSTAT,$1); }
-	| IF expression THEN statement ELSE statement
+	| IF expression THEN conditions ELSE conditions
 		{ 
 			//check type of expression for boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); } 
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,$6)); 
 		}
-	| WHILE expression DO statement
+	| WHILE expression DO conditions
 		{ 
 			//check if expression is type boolean
 			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
@@ -304,7 +305,7 @@ ifelse
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
 			$$ = make_tree(IF,$2,$4);
 		}
-	| IF expression THEN ifelse ELSE conditions
+	| IF expression THEN conditions ELSE ifelse
 		{
 			//check type of expression is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
@@ -331,7 +332,7 @@ procedure_statement
 	 	{ 
 	 		//search ID and check if valid procedure call
 	 		$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),NULL); 
-	 		check_procedure($$,PROCEDURE);
+	 		//check_procedure($$,PROCEDURE);
 	 	}
 	| ID '(' expression_list ')'
 		{

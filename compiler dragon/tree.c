@@ -10,7 +10,7 @@ void assign_mark(list_t *l,int mark){
 	assert(l!=NULL);
 	list_t *temp=NULL;
 	for(temp=l;temp!=NULL;temp=temp->next){
-		temp->mark=mark;
+		//temp->mark=mark;
 		temp->node->mark=mark;
 	}
 }
@@ -26,7 +26,7 @@ void assign_type(list_t *l,tree_t *ttype){
 		type=ttype->type;
 	}
 	for(temp=l;temp!=NULL;temp=temp->next){
-		temp->type=type;
+		//temp->type=type;
 		temp->node->type=type;
 	}
 }
@@ -129,6 +129,7 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[ID:%s\n",(t->attribute.sval)->name);
 			break;
 		case NAME:
+			//fprintf(stderr, "[NAME:" );
 			print_id(t->attribute.sval->name);
 			print_mark(t->attribute.sval->mark);
 			if(t->attribute.sval->mark==FUNCTION){
