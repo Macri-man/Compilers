@@ -15,7 +15,11 @@
 
 	extern scope_t *top_scope;
 	extern node_t *temp;
+	extern node_t *subprogram;
 	extern tree_t *tree;
+
+	int depth;
+	FILE * assemble;
 %}
 
 %union{
@@ -51,7 +55,7 @@
 %token VAR
 %token ARRAY OF DOTDOT
 %token INTEGER REAL CHAR STRING BOOLEAN
-%token FUNCTION PROCEDURE
+%token FUNCTION PROCEDURE READ WRITE
 %token BBEGIN END
 %token IF THEN ELSE
 %token WHILE DO FOR TO
@@ -94,7 +98,16 @@
 %%
 
 program:
-	{ top_scope = scope_push(top_scope,"PROGRAM"); }
+	{ 
+		top_scope = scope_push(top_scope,"PROGRAM");
+		temp=scope_insert(top_scope,"read");
+		temp->type=FUNCTION;
+		temp->mark=READ;
+		temp=scope_insert(top_scope,"write");
+		temp->type=FUNCTION;
+		temp->mark=WRITE;
+
+	}
 	PROGRAM ID '(' identifier_list ')' ';'
 	declarations
 	subprogram_declarations
@@ -103,10 +116,10 @@ program:
 	{
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
 		fprintf(stderr,"\n\n\n");
+		//print_scope(top_scope);
 		print_tree($$,0);
+		//fprintf(stderr,"\n\n\n");
 		top_scope = scope_pop(top_scope);
-		fprintf(stderr,"\n\n\n");
-		//print_tree($$,0);
 	}
 	;
 
@@ -137,6 +150,9 @@ declarations
 			assign_mark($3,LOCAL);
 			//make list of identifier list and append id list to the declarations list
 			$$ = list_append($1,$3);
+			/*fprintf(stderr,"\n\n\n");
+			print_tree(make_treeFromList(DECLIST,$$),0);
+			fprintf(stderr,"\n\n\n");*/
 		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
@@ -149,6 +165,9 @@ type
 		{ 
 			//make sure the ID knows the range of the array
 			$$ = make_tree(ARRAY,make_tree($8,NULL,NULL),make_tree(ARRAY_RANGE,make_inum(INUM),make_inum(INUM))); 
+			/*fprintf(stderr,"\n\n\n");
+			print_tree($$,0);
+			fprintf(stderr,"\n\n\n");*/
 		}
 	;
 
@@ -159,7 +178,12 @@ standard_type
 
 subprogram_declarations
 	: subprogram_declarations subprogram_declaration ';'
-		{ $$ = make_tree(SUBDECLS,$1,$2); }
+		{ 
+			$$ = make_tree(SUBDECLS,$1,$2); 
+			/*fprintf(stderr,"\n\n\n");
+			print_tree($$,0);
+			fprintf(stderr,"\n\n\n");*/
+		}
 	| /* empty */
 		{ $$ = NULL; }//make_tree(EMTPY,NULL,NULL); }
 	;
@@ -167,44 +191,55 @@ subprogram_declarations
 subprogram_declaration
 	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
-			top_scope = scope_pop(top_scope); 
 			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECLBODY,make_treeFromList(DECLIST,$2),make_tree(SUBDECLS,$3,make_tree(COMPSTAT,$4,NULL))));
+			top_scope = scope_pop(top_scope); 
 		}
 	;
 
 subprogram_head:
 	FUNCTION ID 
 		{	
-			assert((top_scope = scope_push(top_scope,"FUNCTION"))!=NULL);
-			//insert ID into scope
-			temp=scope_insert(top_scope,$2);
-			//assert(temp!=NULL); 
+			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
+			assert(subprogram = scope_insert(top_scope,$2));
+			//fprintf(stderr,"\n[SCOPE %s] subprogram: %s\n",top_scope->name,subprogram->name);
+			assert((top_scope = scope_push(top_scope,$2))!=NULL);
+			//fprintf(stderr,"\n[SCOPE %s]\n",top_scope->name);
 		}
 			arguments ':' standard_type ';'
 		{
-			temp=scope_insert(top_scope,$2);
-			temp->type=FUNCTION;
-			temp->mark=$6;
-			temp->args=$4;
-			$$ = make_tree(FUNCTION,tree=make_id(temp),make_treeFromList(ARGLIST,$4));
+			//insert ID into scope
+			subprogram->type=FUNCTION;
+			subprogram->mark=$6;
+			subprogram->args=$4;
+			//fprintf(stderr,"\n[SCOPE %s] subprogram: %s %d\n",top_scope->name,subprogram->name,subprogram->type);
+			//fprintf(stderr,"[SCOPE %s] subprogram: %s %d",top_scope->name,temp->name,temp->type);
+			$$ = make_tree(FUNCTION,tree=make_id(subprogram),make_treeFromList(ARGLIST,$4));
 			tree->type=NAME;
+			/*fprintf(stderr,"\n\n\n");
+			print_tree($$,0);
+			fprintf(stderr,"\n\n\n");*/
 		}
 	| 	
-		PROCEDURE ID 
-		{	
+		PROCEDURE ID
+		{
 			//insert ID into scope
-			assert((top_scope = scope_push(top_scope,"PROCEDURE"))!=NULL);
+			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
+			assert(subprogram = scope_insert(top_scope,$2));
+			assert((top_scope = scope_push(top_scope,$2))!=NULL);
+			//fprintf(stderr,"[SCOPE %s]",top_scope->name);
 
 		}
 		arguments ';'
 		{ 
-			temp=scope_insert(top_scope,$2);
-			//assert(temp!=NULL); 
-			temp->type=PROCEDURE;
-			temp->mark=PROCEDURE;
-			temp->args=$4;
-			$$ = make_tree(PROCEDURE,tree=make_id(temp),make_treeFromList(ARGLIST,$4)); 
+			//insert ID into scope
+			subprogram->type=PROCEDURE;
+			subprogram->mark=PROCEDURE;
+			subprogram->args=$4;
+			$$ = make_tree(PROCEDURE,tree=make_id(subprogram),make_treeFromList(ARGLIST,$4)); 
 			tree->type=NAME;
+			/*fprintf(stderr,"\n\n\n");
+			print_tree($$,0);
+			fprintf(stderr,"\n\n\n");*/
 		}
 	;
 
@@ -331,13 +366,15 @@ procedure_statement
 	: ID
 	 	{ 
 	 		//search ID and check if valid procedure call
-	 		$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),NULL); 
+	 		$$ = make_tree(PROCEDURE,tree=make_id(scope_search(top_scope,$1)),NULL);
+	 		tree->type=NAME;
 	 		//check_procedure($$,PROCEDURE);
 	 	}
 	| ID '(' expression_list ')'
 		{
 			//search ID and check if valid procedure call
-			$$ = make_tree(PROCEDURE,make_id(scope_search(top_scope,$1)),$3); 
+			$$ = make_tree(PROCEDURE,tree=make_id(scope_search(top_scope,$1)),$3);
+			tree->type=NAME;
 			check_procedure($$,PROCEDURE);
 		}
 	;
@@ -376,13 +413,14 @@ term
 	;
 
 factor
-	: ID { 	
+	: ID {
 			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
-			temp=scope_search_all(top_scope,$1);
-			$$ = make_id(temp); 
+			temp=scope_search_all(top_scope,$1,&depth);
+			$$ = tree = make_id(temp);
+			tree->scope_depth=depth; 
 		}
 	| ID '(' expression_list ')' 
 		{
@@ -391,8 +429,10 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
-			temp=scope_search_all(top_scope,$1);
-			$$ = make_tree(FUNCTION_CALL,make_id(temp),$3);
+			temp=scope_search(top_scope,$1);
+			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s %d",top_scope->name,$1,temp->name,temp->type);
+			$$ = make_tree(FUNCTION_CALL,tree=make_id(temp),$3);
+			tree->type=NAME;
 			check_function($$,FUNCTION); 
 		}
 	| ID '[' expression_list ']' 
@@ -402,8 +442,10 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
-			temp=scope_search_all(top_scope,$1);
-			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3); 
+			temp=scope_search_all(top_scope,$1,&depth);
+			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);
+			$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
+			tree->scope_depth=depth;
 			check_array($$,ARRAY_ACCESS);
 		}
 	| INUM
@@ -421,11 +463,17 @@ factor
 scope_t *top_scope;
 node_t *temp;
 tree_t *tree;
+node_t *subprogram;
+int depth;
 int main(){
+	assemble = fopen("assemble.s", "w");
 	top_scope=NULL;
 	temp=NULL;
 	tree=NULL;
+	subprogram=NULL;
+	depth=0;
 	yyparse();
+	fclose(assemble);
 }
 
 

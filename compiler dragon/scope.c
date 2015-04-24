@@ -43,11 +43,12 @@ node_t *scope_insert(scope_t *scope,char *name){
 }
 
 /* gloabl search */
-node_t *scope_search_all(scope_t *curr_scope,char *name){
+node_t *scope_search_all(scope_t *curr_scope,char *name,int depth){
 
 	node_t *p;
 	for(curr_scope;curr_scope!=NULL;curr_scope=curr_scope->next){
 		p=scope_search(curr_scope,name);
+		depth+=1;
 		if(p!=NULL) return p;
 	}
 	return NULL;
@@ -75,10 +76,15 @@ scope_t *scope_pop(scope_t *top){
 }
 
 void print_scope(scope_t *top){
-	node_t *temp=NULL;
-	for(temp=top->table;temp!=NULL;temp=temp->next){
+	scope_t *temp=NULL;
+	int num=0;
+	for(temp=top;temp!=NULL;temp=temp->next){
 		fprintf(stderr, "%s\n",temp->name);
 	}
+	for(temp=top;temp!=NULL;temp=temp->next){
+		num++;
+	}
+	fprintf(stderr, "Number of Scopes: %d\n",num);
 }
 
 /* hash function (Weinberger's hash)*/

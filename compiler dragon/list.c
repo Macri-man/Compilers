@@ -44,6 +44,18 @@ list_t *list_append_node(list_t *list,node_t *node){
 	return list;
 }
 
+void offset(list_t *head,int sign){
+	int num=0;
+	list_t *temp;
+	for(temp=head;temp->next!=NULL;temp=temp->next){
+		if(sign==0){
+			num+=8;
+		}else{
+			num-=8;
+		}
+	}
+}
+
 int num_list(list_t *head){
 	assert(head!=NULL);
 	int num=0;

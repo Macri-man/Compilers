@@ -12,6 +12,8 @@ typedef struct tree_s{
 		struct node_s *sval;	/* ID */
 		struct list_s *lval;
 	} attribute;
+	int rank;
+	int scope_depth;
 	struct tree_s *left;
 	struct tree_s *right;
 }tree_t;

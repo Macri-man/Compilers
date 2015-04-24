@@ -18,6 +18,8 @@ Terminals which are not used
    CHAR
    STRING
    BOOLEAN
+   READ
+   WRITE
    EMTPY
    CONDITIONAL
    TYPE
@@ -183,100 +185,102 @@ STRING (289)
 BOOLEAN (290)
 FUNCTION (291) 15
 PROCEDURE (292) 17
-BBEGIN (293) 22
-END (294) 22
-IF (295) 32 35 36
-THEN (296) 32 35 36
-ELSE (297) 32 36
-WHILE (298) 33
-DO (299) 33 34
-FOR (300) 34
-TO (301) 34
-EMTPY (302)
-CONDITIONAL (303)
-TYPE (304)
-NAME (305)
-LIST (306)
-ARRAY_ACCESS (307)
-ARRAY_RANGE (308)
-STATEMENT (309)
-FUNCTION_CALL (310)
-PROCEDURE_CALL (311)
-WHILE_DO (312)
-DECL (313)
-SUBDECL (314)
-SUBDECLS (315)
-SUBPROGDECL (316)
-SUBPROGDECLHEAD (317)
-SUBPROGDECLBODY (318)
-LOCAL (319)
-PARAMETER (320)
-IDLIST (321)
-EXPR (322)
-EXPRLIST (323)
-PARALIST (324)
-ARGLIST (325)
-DECLIST (326)
-STATLIST (327)
-PROCSTAT (328)
-COMPSTAT (329)
+READ (293)
+WRITE (294)
+BBEGIN (295) 22
+END (296) 22
+IF (297) 32 35 36
+THEN (298) 32 35 36
+ELSE (299) 32 36
+WHILE (300) 33
+DO (301) 33 34
+FOR (302) 34
+TO (303) 34
+EMTPY (304)
+CONDITIONAL (305)
+TYPE (306)
+NAME (307)
+LIST (308)
+ARRAY_ACCESS (309)
+ARRAY_RANGE (310)
+STATEMENT (311)
+FUNCTION_CALL (312)
+PROCEDURE_CALL (313)
+WHILE_DO (314)
+DECL (315)
+SUBDECL (316)
+SUBDECLS (317)
+SUBPROGDECL (318)
+SUBPROGDECLHEAD (319)
+SUBPROGDECLBODY (320)
+LOCAL (321)
+PARAMETER (322)
+IDLIST (323)
+EXPR (324)
+EXPRLIST (325)
+PARALIST (326)
+ARGLIST (327)
+DECLIST (328)
+STATLIST (329)
+PROCSTAT (330)
+COMPSTAT (331)
 
 
 Nonterminals, with rules where they appear
 
-$accept (83)
+$accept (85)
     on left: 0
-program (84)
+program (86)
     on left: 2, on right: 0
-@1 (85)
+@1 (87)
     on left: 1, on right: 2
-identifier_list (86)
+identifier_list (88)
     on left: 3 4, on right: 2 4 5 20 21
-declarations (87)
+declarations (89)
     on left: 5 6, on right: 2 5 13
-type (88)
+type (90)
     on left: 7 8, on right: 5 20 21
-standard_type (89)
+standard_type (91)
     on left: 9 10, on right: 7 8 15
-subprogram_declarations (90)
+subprogram_declarations (92)
     on left: 11 12, on right: 2 11 13
-subprogram_declaration (91)
+subprogram_declaration (93)
     on left: 13, on right: 11
-subprogram_head (92)
+subprogram_head (94)
     on left: 15 17, on right: 13
-@2 (93)
+@2 (95)
     on left: 14, on right: 15
-@3 (94)
+@3 (96)
     on left: 16, on right: 17
-arguments (95)
+arguments (97)
     on left: 18 19, on right: 15 17
-parameter_list (96)
+parameter_list (98)
     on left: 20 21, on right: 18 21
-compound_statement (97)
+compound_statement (99)
     on left: 22, on right: 2 13 31
-optional_statements (98)
+optional_statements (100)
     on left: 23 24, on right: 22
-statement_list (99)
+statement_list (101)
     on left: 25 26, on right: 23 26
-statement (100)
+statement (102)
     on left: 27 28, on right: 25 26 35
-conditions (101)
+conditions (103)
     on left: 29 30 31 32 33 34, on right: 27 32 33 34 36
-ifelse (102)
+ifelse (104)
     on left: 35 36, on right: 28 36
-variable (103)
+variable (105)
     on left: 37 38, on right: 29
-procedure_statement (104)
+procedure_statement (106)
     on left: 39 40, on right: 30
-expression_list (105)
+expression_list (107)
     on left: 41 42, on right: 40 42 51 52
-expression (106)
+expression (108)
     on left: 43 44, on right: 29 32 33 34 35 36 38 41 42 55
-simple_expression (107)
+simple_expression (109)
     on left: 45 46 47, on right: 43 44 47
-term (108)
+term (110)
     on left: 48 49, on right: 45 46 47 49
-factor (109)
+factor (111)
     on left: 50 51 52 53 54 55 56, on right: 48 49 56
 
 

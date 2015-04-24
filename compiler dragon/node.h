@@ -13,8 +13,9 @@ typedef struct node_s{
 		int range[2];
 	}semantics;
 
+	int offset;
+	int depth;
 	struct list_s *args;
-
 	struct node_s *next;
 }node_t;
 

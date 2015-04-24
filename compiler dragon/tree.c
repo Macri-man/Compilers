@@ -48,7 +48,8 @@ tree_t *make_tree(int type, tree_t *left, tree_t *right){
 
 	tree_t *p=(tree_t *)malloc(sizeof(tree_t));
 	assert(p != NULL);
-
+	p->rank=0;;
+	p->scope_depth=0;
 	p->type=type;
 	p->left=left;
 	p->right=right;
@@ -131,9 +132,11 @@ void print_tree(tree_t *t, int spaces){
 		case NAME:
 			//fprintf(stderr, "[NAME:" );
 			print_id(t->attribute.sval->name);
-			print_mark(t->attribute.sval->mark);
-			if(t->attribute.sval->mark==FUNCTION){
+			if(t->attribute.sval->type==PROCEDURE){
 				print_type(t->attribute.sval->type);
+			}else{
+				print_type(t->attribute.sval->mark);
+				print_mark(t->attribute.sval->type);
 			}
 			fprintf(stderr, "\n");
 			break;
@@ -195,13 +198,13 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[ARRAY RANGE:");
 			break;
 		case FUNCTION: 
-			fprintf(stderr, "[FUNCTION: ");
+			fprintf(stderr, "[FUNCTION: \n");
 			break;
 		case FUNCTION_CALL: 
-			fprintf(stderr, "[FUNCTION CALL: ");
+			fprintf(stderr, "[FUNCTION CALL: \n");
 			break;
 		case PROCEDURE: 
-			fprintf(stderr, "[PROCEDURE: ");
+			fprintf(stderr, "[PROCEDURE: \n");
 			break;
 		case EXPRLIST: 
 			fprintf(stderr, "[EXPRESSION LIST: \n");
@@ -258,7 +261,7 @@ void print_tree(tree_t *t, int spaces){
 
 
 void list_print(list_t *head){
-	assert(head!=NULL);
+	//assert(head!=NULL);
 	list_t *ls=NULL;
 	for(ls=head;ls!=NULL;ls=ls->next){
 		print_id(ls->node->name);
@@ -293,6 +296,12 @@ void print_mark(int mark){
 		case PROCEDURE:
 			fprintf(stderr, " PROCEDURE ");
 			break;
+		case READ:
+			fprintf(stderr, " READ ");
+			break;
+		case WRITE:
+			fprintf(stderr, " WRITE ");
+			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
@@ -305,6 +314,12 @@ void print_type(int type){
 			break;
 		case REAL:
 			fprintf(stderr, " REAL]");
+			break;
+		case FUNCTION:
+			fprintf(stderr, " FUNCTION]");
+			break;
+		case PROCEDURE:
+			fprintf(stderr, " PROCEDURE] ");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
