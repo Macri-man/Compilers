@@ -43,7 +43,7 @@ node_t *scope_insert(scope_t *scope,char *name){
 }
 
 /* gloabl search */
-node_t *scope_search_all(scope_t *curr_scope,char *name,int depth){
+node_t *scope_search_all(scope_t *curr_scope,char *name,int *depth){
 
 	node_t *p;
 	for(curr_scope;curr_scope!=NULL;curr_scope=curr_scope->next){

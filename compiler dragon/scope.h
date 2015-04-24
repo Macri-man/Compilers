@@ -19,7 +19,7 @@ scope_t *make_scope(char *name);
 node_t *scope_search(scope_t *head,char *name);
 node_t *scope_insert(scope_t *head,char *name);
 
-node_t *scope_search_all(scope_t *head,char *name,int depth);
+node_t *scope_search_all(scope_t *head,char *name,int *depth);
 
 void print_scope(scope_t *top);
 
