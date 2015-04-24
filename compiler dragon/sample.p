@@ -35,5 +35,5 @@ program main( input, output );
         read( a );
         c := gcd ( a , b );
         x := gcdtwo( y , z );
-        writeln(c)
+        write(c)
     end.

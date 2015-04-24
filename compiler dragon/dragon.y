@@ -91,8 +91,6 @@
 %type <lval> parameter_list
 %type <lval> identifier_list
 
-%type <cval> sign
-
 %%
 
 program:
@@ -104,7 +102,8 @@ program:
 	'.'
 	{
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
-		print_tree($10,0);
+		fprintf(stderr,"\n\n\n");
+		print_tree($$,0);
 		top_scope = scope_pop(top_scope);
 		fprintf(stderr,"\n\n\n");
 		//print_tree($$,0);
@@ -184,8 +183,8 @@ subprogram_head:
 			arguments ':' standard_type ';'
 		{
 			temp=scope_insert(top_scope,$2);
-			temp->mark=FUNCTION;
-			temp->type=$6;
+			temp->type=FUNCTION;
+			temp->mark=$6;
 			temp->args=$4;
 			$$ = make_tree(FUNCTION,tree=make_id(temp),make_treeFromList(ARGLIST,$4));
 			tree->type=NAME;
@@ -267,7 +266,7 @@ statement
 
 conditions
 	: variable ASSIGNOP expression
-		{ 
+		{
 			//check type of varibale == type of expression
 			//if(type($1)!=type($3)){ fprintf(stderr,"Type Mismatch: \n"); }
 			$$ = make_tree(ASSIGNOP,$1,$3); 
@@ -286,7 +285,7 @@ conditions
 		{ 
 			//check if expression is type boolean
 			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
-			$$ = make_tree(WHILE_DO,$2,$4); 
+			$$ = make_tree(WHILE,$2,$4); 
 		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
 		{	
@@ -316,7 +315,8 @@ ifelse
 
 variable
 	: ID
-		{ $$ = make_id(temp=scope_search(top_scope,$1));
+		{ 
+			$$ = make_id(temp=scope_search(top_scope,$1));
 			//assert(temp!=NULL);
 		}
 	| ID '[' expression ']'
@@ -359,8 +359,11 @@ expression
 simple_expression
 	: term
 		{ $$ = $1; }
-	| sign term
-		{ $$ = make_op(ADDOP,$1,$2,NULL); }
+	| ADDOP term
+		{ 
+			//if(type(make_op(ADDOP,$2,NULL,NULL))==OR){ fprintf(stderr,"Unary Error: \n"); print_tree($$,0); }
+			$$ = make_op(ADDOP,$1,$2,NULL); 
+		}
 	| simple_expression ADDOP term
 		{ $$ = make_op(ADDOP,$2,$1,$3); }
 	;
@@ -378,6 +381,7 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
+			temp=scope_search_all(top_scope,$1);
 			$$ = make_id(temp); 
 		}
 	| ID '(' expression_list ')' 
@@ -387,6 +391,7 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
+			temp=scope_search_all(top_scope,$1);
 			$$ = make_tree(FUNCTION_CALL,make_id(temp),$3);
 			check_function($$,FUNCTION); 
 		}
@@ -397,6 +402,7 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}*/
+			temp=scope_search_all(top_scope,$1);
 			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3); 
 			check_array($$,ARRAY_ACCESS);
 		}
@@ -409,11 +415,6 @@ factor
 	| NOT factor
 		{ $$ = make_tree(NOT,$2,NULL); }
 	;
-
-sign : '+' { $$ = '+'; }
-     | '-' { $$ = '-'; }
-     ;
-
 %%
 
 

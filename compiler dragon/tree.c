@@ -197,6 +197,9 @@ void print_tree(tree_t *t, int spaces){
 		case FUNCTION: 
 			fprintf(stderr, "[FUNCTION: ");
 			break;
+		case FUNCTION_CALL: 
+			fprintf(stderr, "[FUNCTION CALL: ");
+			break;
 		case PROCEDURE: 
 			fprintf(stderr, "[PROCEDURE: ");
 			break;
