@@ -19,4 +19,4 @@ lex.yy.o: lex.yy.c
 lex.yy.c: dragon.l
 	lex -l dragon.l
 clean:
-	rm -f y.tab.* lex.yy.* dragon *.o
+	rm -f y.tab.* lex.yy.* dragon *.o *.s
