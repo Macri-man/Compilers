@@ -1,7 +1,7 @@
-(* ERROR: non-integer type for array index *)
+(* ERROR: function missing return statement *)
 program main( input, output );
-  var a: array[3 .. 7] of real;
-  var x: real;
+  function foo(a: integer): integer;
+  begin
+  end;
 begin
-  a[1] := 1.23
 end.
