@@ -65,6 +65,7 @@
 %token FUNCTION_CALL PROCEDURE_CALL
 %token WHILE_DO DECL SUBDECL SUBDECLS SUBPROGDECL SUBPROGDECLHEAD SUBPROGDECLBODY
 %token LOCAL PARAMETER IDLIST EXPR EXPRLIST PARALIST ARGLIST DECLIST STATLIST PROCSTAT COMPSTAT
+%token FROM
 
 %type <tval> program
 %type <tval> expression
@@ -100,13 +101,13 @@
 program:
 	{ 
 		top_scope = scope_push(top_scope,"PROGRAM");
+		fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
 		temp=scope_insert(top_scope,"read");
 		temp->type=FUNCTION;
 		temp->mark=READ;
 		temp=scope_insert(top_scope,"write");
 		temp->type=FUNCTION;
 		temp->mark=WRITE;
-
 	}
 	PROGRAM ID '(' identifier_list ')' ';'
 	declarations
@@ -115,11 +116,12 @@ program:
 	'.'
 	{
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$3)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$8),make_tree(SUBPROGDECL,$9,$10))));
-		fprintf(stderr,"\n\n\n");
 		//print_scope(top_scope);
-		print_tree($$,0);
 		//fprintf(stderr,"\n\n\n");
+		fprintf(stderr,"\n\nPOP SCOPE %s: \n",top_scope->name);
 		top_scope = scope_pop(top_scope);
+		fprintf(stderr,"\n\n\n");
+		print_tree($$,0);
 	}
 	;
 
@@ -172,8 +174,8 @@ type
 	;
 
 standard_type
-	: INTEGER 	{ $$ = INTEGER; }
-	| REAL		{ $$ = REAL; }
+	: INTEGER 	{ $$ = INUM; }
+	| REAL		{ $$ = RNUM; }
 	;
 
 subprogram_declarations
@@ -192,6 +194,7 @@ subprogram_declaration
 	: subprogram_head declarations subprogram_declarations compound_statement
 		{	
 			$$ = make_tree(SUBDECL,$1,make_tree(SUBPROGDECLBODY,make_treeFromList(DECLIST,$2),make_tree(SUBDECLS,$3,make_tree(COMPSTAT,$4,NULL))));
+			fprintf(stderr,"\nPOP SCOPE %s: \n",top_scope->name);
 			top_scope = scope_pop(top_scope); 
 		}
 	;
@@ -203,6 +206,7 @@ subprogram_head:
 			assert(subprogram = scope_insert(top_scope,$2));
 			//fprintf(stderr,"\n[SCOPE %s] subprogram: %s\n",top_scope->name,subprogram->name);
 			assert((top_scope = scope_push(top_scope,$2))!=NULL);
+			fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
 			//fprintf(stderr,"\n[SCOPE %s]\n",top_scope->name);
 		}
 			arguments ':' standard_type ';'
@@ -211,6 +215,10 @@ subprogram_head:
 			subprogram->type=FUNCTION;
 			subprogram->mark=$6;
 			subprogram->args=$4;
+			/*assert(temp = scope_insert(top_scope,$2));
+			temp->type=FUNCTION;
+			temp->mark=$6;
+			temp->args=$4;*/
 			//fprintf(stderr,"\n[SCOPE %s] subprogram: %s %d\n",top_scope->name,subprogram->name,subprogram->type);
 			//fprintf(stderr,"[SCOPE %s] subprogram: %s %d",top_scope->name,temp->name,temp->type);
 			$$ = make_tree(FUNCTION,tree=make_id(subprogram),make_treeFromList(ARGLIST,$4));
@@ -226,6 +234,8 @@ subprogram_head:
 			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
 			assert(subprogram = scope_insert(top_scope,$2));
 			assert((top_scope = scope_push(top_scope,$2))!=NULL);
+			fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
+			assert(temp = scope_insert(top_scope,$2));
 			//fprintf(stderr,"[SCOPE %s]",top_scope->name);
 
 		}
@@ -235,6 +245,10 @@ subprogram_head:
 			subprogram->type=PROCEDURE;
 			subprogram->mark=PROCEDURE;
 			subprogram->args=$4;
+			/*assert(temp = scope_insert(top_scope,$2));
+			temp->type=PROCEDURE;
+			temp->mark=PROCEDURE;
+			temp->args=$4;*/
 			$$ = make_tree(PROCEDURE,tree=make_id(subprogram),make_treeFromList(ARGLIST,$4)); 
 			tree->type=NAME;
 			/*fprintf(stderr,"\n\n\n");
@@ -303,7 +317,12 @@ conditions
 	: variable ASSIGNOP expression
 		{
 			//check type of varibale == type of expression
-			//if(type($1)!=type($3)){ fprintf(stderr,"Type Mismatch: \n"); }
+			//fprintf(stderr,"\nCheck: %d \n",check_type($1));
+			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			if(check_type($1)!=check_type($3)){
+				fprintf(stderr,"Mismatch Types\n");
+				exit(1);
+			}
 			$$ = make_tree(ASSIGNOP,$1,$3); 
 		}
 	| procedure_statement
@@ -313,50 +332,73 @@ conditions
 	| IF expression THEN conditions ELSE conditions
 		{ 
 			//check type of expression for boolean
-			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); } 
-			$$ = make_tree(IF,$2,make_tree(THEN,$4,$6)); 
+			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); }
+			if($2->type!=RELOP){
+				fprintf(stderr,"Expression needs to be Boolean\n");
+				exit(1);
+			} 
+			$$ = make_tree(IF,$2,make_tree(THEN,$4,make_tree(ELSE,$6,NULL))); 
 		}
 	| WHILE expression DO conditions
 		{ 
+			if($2->type!=RELOP){
+				fprintf(stderr,"Expression needs to be Boolean\n");
+				exit(1);
+			} 
 			//check if expression is type boolean
 			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
 			$$ = make_tree(WHILE,$2,$4); 
 		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
-		{	
+		{
 			//check if type of temp is type of expression before TO and type temp is type of expression after TO
 			temp=scope_search(top_scope,$2);
+			if(check_type(make_id(temp))!=check_type($4)){
+				fprintf(stderr,"Mismatch Types\n");
+				exit(1);
+			}
 			//if(type(make_id(temp))!=type($4)){ fprintf(stderr,"Boolean Error: \n"); } 
 			//if(type(make_id(temp))!=type($6)){ fprintf(stderr,"Boolean Error: \n"); }
-			$$ = make_tree(FOR,make_id(temp),make_tree(DO,make_tree(TO,$4,$6),$8));
+			$$ = make_tree(FOR,make_id(temp),make_tree(DO,$8,make_tree(FROM,$4,$6)));
 		}
 	;
 
 ifelse
 	: IF expression THEN statement
 		{
+			if($2->type!=RELOP){
+				fprintf(stderr,"Expression needs to be Boolean\n");
+				exit(1);
+			} 
 			//check type of expresion is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
-			$$ = make_tree(IF,$2,$4);
+			$$ = make_tree(IF,$2,make_tree(THEN,$4,NULL));
 		}
 	| IF expression THEN conditions ELSE ifelse
 		{
+			if($2->type!=RELOP){
+				fprintf(stderr,"Expression needs to be Boolean\n");
+				exit(1);
+			} 
 			//check type of expression is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
-			$$ = make_tree(IF, $2, make_tree(THEN,$2,$6));
+			$$ = make_tree(IF,$2,make_tree(THEN,$4,make_tree(ELSE,$6,NULL)));
 		}
 	;
 
 
 variable
 	: ID
-		{ 
-			$$ = make_id(temp=scope_search(top_scope,$1));
+		{ 	if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
+				fprintf(stderr,"Objects must be declared: [Object %s] is not defined\n",$1);
+				exit(1);
+			}
+			$$ = make_id(temp=scope_search_all(top_scope,$1,&depth));
 			//assert(temp!=NULL);
 		}
 	| ID '[' expression ']'
 		{ 
-			$$ = make_tree(ARRAY_ACCESS,make_id(temp=scope_search(top_scope,$1)),$3);
+			$$ = make_tree(ARRAY_ACCESS,make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
 			//assert(temp!=NULL);
 			check_array($$,ARRAY_ACCESS); 
 		}
@@ -366,14 +408,14 @@ procedure_statement
 	: ID
 	 	{ 
 	 		//search ID and check if valid procedure call
-	 		$$ = make_tree(PROCEDURE,tree=make_id(scope_search(top_scope,$1)),NULL);
+	 		$$ = make_tree(PROCEDURE,tree=make_id(scope_search_all(top_scope,$1,&depth)),NULL);
 	 		tree->type=NAME;
 	 		//check_procedure($$,PROCEDURE);
 	 	}
 	| ID '(' expression_list ')'
 		{
 			//search ID and check if valid procedure call
-			$$ = make_tree(PROCEDURE,tree=make_id(scope_search(top_scope,$1)),$3);
+			$$ = make_tree(PROCEDURE,tree=make_id(scope_search_all(top_scope,$1,&depth)),$3);
 			tree->type=NAME;
 			check_procedure($$,PROCEDURE);
 		}
@@ -414,22 +456,22 @@ term
 
 factor
 	: ID {
-			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}*/
-			temp=scope_search_all(top_scope,$1,&depth);
+			}
+			//temp=scope_search_all(top_scope,$1,&depth);
 			$$ = tree = make_id(temp);
 			tree->scope_depth=depth; 
 		}
 	| ID '(' expression_list ')' 
 		{
 			//check if valid function call
-			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search(top_scope,$1)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}*/
-			temp=scope_search(top_scope,$1);
+			}
+			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s %d",top_scope->name,$1,temp->name,temp->type);
 			$$ = make_tree(FUNCTION_CALL,tree=make_id(temp),$3);
 			tree->type=NAME;
@@ -438,11 +480,11 @@ factor
 	| ID '[' expression_list ']' 
 		{ 
 			//check if valid array access
-			/*if((temp=scope_search_all(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
-			}*/
-			temp=scope_search_all(top_scope,$1,&depth);
+			}
+			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);
 			$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 			tree->scope_depth=depth;

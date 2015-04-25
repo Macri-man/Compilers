@@ -18,6 +18,32 @@ int type(tree_t *expression){
 	return -1;*/
 }
 
+int check_type(tree_t *expression){
+	if(expression==NULL) return -1;
+	switch(expression->type){
+		case ID:
+			return expression->attribute.sval->type;
+			break;
+		case INUM:
+			return expression->type;
+			break;
+		case RNUM:
+			return expression->type;
+			break;
+		case ADDOP:
+			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1; 
+			break;
+		case MULOP:
+			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1;
+			break;
+		case DIV:
+			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1;
+			break;
+		default:
+			fprintf(stderr, "Wrong Type in Expression: %d\n",expression->type);
+	}
+}
+
 int lengthArg(list_t *args){
 	return num_list(args);
 }

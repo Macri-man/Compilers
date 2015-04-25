@@ -20,6 +20,8 @@ list_t *list_append(list_t *head,list_t *list);
 list_t *list_append_node(list_t *head,struct node_s *node);
 list_t *list_append_tree(list_t *head,struct tree_s *tree);
 
+void print_list(list_t *head);
+
 void offset(list_t *head,int sign);
 int num_list(list_t *head);
 

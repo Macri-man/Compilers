@@ -10,4 +10,7 @@ int equalArgs(tree_t *args1,tree_t *args2);
 
 int type(tree_t *expression);
 
+int check_type(tree_t *expression);
+int findtype(tree_t *expression,int type);
+
 #endif

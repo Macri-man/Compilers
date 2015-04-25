@@ -135,8 +135,8 @@ void print_tree(tree_t *t, int spaces){
 			if(t->attribute.sval->type==PROCEDURE){
 				print_type(t->attribute.sval->type);
 			}else{
-				print_type(t->attribute.sval->mark);
 				print_mark(t->attribute.sval->type);
+				print_type(t->attribute.sval->mark);
 			}
 			fprintf(stderr, "\n");
 			break;
@@ -169,6 +169,9 @@ void print_tree(tree_t *t, int spaces){
 			break;
 		case TO: 
 			fprintf(stderr, "[TO: \n");
+			break;
+		case FROM: 
+			fprintf(stderr, "[FROM: \n");
 			break;
 		case IF: 
 			fprintf(stderr, "[IF: \n");
@@ -246,7 +249,7 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[SUBPROGRAM DECLARATION BODY: \n");
 			break;
 		case PROGRAM:
-			fprintf(stderr, "[PROGRAM:");
+			fprintf(stderr, "[PROGRAM:\n");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
@@ -302,6 +305,11 @@ void print_mark(int mark){
 		case WRITE:
 			fprintf(stderr, " WRITE ");
 			break;
+		case INUM:
+			fprintf(stderr, " INUM]");
+			break;
+		case RNUM:
+			fprintf(stderr, " RNUM]");
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
@@ -315,8 +323,20 @@ void print_type(int type){
 		case REAL:
 			fprintf(stderr, " REAL]");
 			break;
+		case INUM:
+			fprintf(stderr, " INUM]");
+			break;
+		case RNUM:
+			fprintf(stderr, " RNUM]");
+			break;
 		case FUNCTION:
 			fprintf(stderr, " FUNCTION]");
+			break;
+		case READ:
+			fprintf(stderr, " READ]");
+			break;
+		case WRITE:
+			fprintf(stderr, " WRITE]");
 			break;
 		case PROCEDURE:
 			fprintf(stderr, " PROCEDURE] ");

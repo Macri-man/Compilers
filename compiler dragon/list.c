@@ -56,6 +56,15 @@ void offset(list_t *head,int sign){
 	}
 }
 
+void print_list(list_t *list){
+	list_t *temp;
+	if(list==NULL) return;
+	if(list->node==NULL) return;
+	for(temp=list;temp!=NULL;temp=temp->next){
+		fprintf(stderr, "%s",temp->node->name);
+	}
+}
+
 int num_list(list_t *head){
 	assert(head!=NULL);
 	int num=0;

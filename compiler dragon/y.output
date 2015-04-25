@@ -48,6 +48,7 @@ Terminals which are not used
    STATLIST
    PROCSTAT
    COMPSTAT
+   FROM
 
 
 Grammar
@@ -224,63 +225,64 @@ DECLIST (328)
 STATLIST (329)
 PROCSTAT (330)
 COMPSTAT (331)
+FROM (332)
 
 
 Nonterminals, with rules where they appear
 
-$accept (85)
+$accept (86)
     on left: 0
-program (86)
+program (87)
     on left: 2, on right: 0
-@1 (87)
+@1 (88)
     on left: 1, on right: 2
-identifier_list (88)
+identifier_list (89)
     on left: 3 4, on right: 2 4 5 20 21
-declarations (89)
+declarations (90)
     on left: 5 6, on right: 2 5 13
-type (90)
+type (91)
     on left: 7 8, on right: 5 20 21
-standard_type (91)
+standard_type (92)
     on left: 9 10, on right: 7 8 15
-subprogram_declarations (92)
+subprogram_declarations (93)
     on left: 11 12, on right: 2 11 13
-subprogram_declaration (93)
+subprogram_declaration (94)
     on left: 13, on right: 11
-subprogram_head (94)
+subprogram_head (95)
     on left: 15 17, on right: 13
-@2 (95)
+@2 (96)
     on left: 14, on right: 15
-@3 (96)
+@3 (97)
     on left: 16, on right: 17
-arguments (97)
+arguments (98)
     on left: 18 19, on right: 15 17
-parameter_list (98)
+parameter_list (99)
     on left: 20 21, on right: 18 21
-compound_statement (99)
+compound_statement (100)
     on left: 22, on right: 2 13 31
-optional_statements (100)
+optional_statements (101)
     on left: 23 24, on right: 22
-statement_list (101)
+statement_list (102)
     on left: 25 26, on right: 23 26
-statement (102)
+statement (103)
     on left: 27 28, on right: 25 26 35
-conditions (103)
+conditions (104)
     on left: 29 30 31 32 33 34, on right: 27 32 33 34 36
-ifelse (104)
+ifelse (105)
     on left: 35 36, on right: 28 36
-variable (105)
+variable (106)
     on left: 37 38, on right: 29
-procedure_statement (106)
+procedure_statement (107)
     on left: 39 40, on right: 30
-expression_list (107)
+expression_list (108)
     on left: 41 42, on right: 40 42 51 52
-expression (108)
+expression (109)
     on left: 43 44, on right: 29 32 33 34 35 36 38 41 42 55
-simple_expression (109)
+simple_expression (110)
     on left: 45 46 47, on right: 43 44 47
-term (110)
+term (111)
     on left: 48 49, on right: 45 46 47 49
-factor (111)
+factor (112)
     on left: 50 51 52 53 54 55 56, on right: 48 49 56
 
 

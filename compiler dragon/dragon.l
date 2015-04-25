@@ -41,6 +41,8 @@ comment     \(\*.*\*\)
 "not"			{ echo("NOT "); return NOT; }
 "var"			{ echo("VAR "); return VAR; }
 "then"			{ echo("THEN "); return THEN; }
+"for"			{ echo("FOR "); return FOR; }
+"to"			{ echo("TO "); return TO; }
 
 ".."	{ echo("DOTDOT "); return DOTDOT; }
 ":="	{ echo("ASSIGNOP "); return ASSIGNOP; }
@@ -49,7 +51,7 @@ comment     \(\*.*\*\)
 "<"		{ fprintf(stderr, "RELOP[%s] ", yytext); yylval.opval=LT; return RELOP; 	}
 "<="	{ fprintf(stderr, "RELOP[%s] ", yytext); yylval.opval=LE; return RELOP; 	}
 ">"		{ fprintf(stderr, "RELOP[%s] ", yytext); yylval.opval=GT; return RELOP; 	}
-"=>"	{ fprintf(stderr, "RELOP[%s] ", yytext); yylval.opval=GE; return RELOP; 	}
+">="	{ fprintf(stderr, "RELOP[%s] ", yytext); yylval.opval=GE; return RELOP; 	}
 
 "-"		{ fprintf(stderr, "ADDOP[%s] ", yytext); yylval.opval=MINUS; return ADDOP; 	}
 "+"		{ fprintf(stderr, "ADDOP[%s] ", yytext); yylval.opval=PLUS; return ADDOP; 	}
