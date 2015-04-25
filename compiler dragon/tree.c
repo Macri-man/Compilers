@@ -20,7 +20,7 @@ void assign_type(list_t *l,tree_t *ttype){
 	assert(l!=NULL);
 	list_t *temp=NULL;
 	if(ttype->type==ARRAY){
-		type=ttype->right->type;
+		type=ttype->left->type;
 		assign_range(l,ttype->right->left->attribute.ival,ttype->right->right->attribute.ival);
 	}else{
 		type=ttype->type;
@@ -195,10 +195,10 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[ARRAY:");
 			break;
 		case ARRAY_ACCESS: 
-			fprintf(stderr, "[ARRAY ACCESS:");
+			fprintf(stderr, "[ARRAY ACCESS:\n");
 			break;
 		case ARRAY_RANGE: 
-			fprintf(stderr, "[ARRAY RANGE:");
+			fprintf(stderr, "[ARRAY RANGE:\n");
 			break;
 		case FUNCTION: 
 			fprintf(stderr, "[FUNCTION: \n");

@@ -1,8 +1,7 @@
-(* ERROR: mismatched type for index variable in FOR loops *)
+(* ERROR: non-integer type for array index *)
 program main( input, output );
-  var a: integer;
+  var a: array[3 .. 7] of real;
   var x: real;
 begin
-  for x := 1 to 5 do
-    a := a + 1
+  a[1] := 1.23
 end.

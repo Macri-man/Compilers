@@ -316,9 +316,9 @@ statement
 conditions
 	: variable ASSIGNOP expression
 		{
-			//check type of varibale == type of expression
-			//fprintf(stderr,"\nCheck: %d \n",check_type($1));
-			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			//check type of variable == type of expression
+			fprintf(stderr,"\nCheck: %d \n",check_type($1));
+			fprintf(stderr,"\nCheck: %d \n",check_type($3));
 			if(check_type($1)!=check_type($3)){
 				fprintf(stderr,"Mismatch Types\n");
 				exit(1);
@@ -389,7 +389,8 @@ ifelse
 
 variable
 	: ID
-		{ 	if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
+		{ 	
+			if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
 				fprintf(stderr,"Objects must be declared: [Object %s] is not defined\n",$1);
 				exit(1);
 			}
@@ -398,9 +399,19 @@ variable
 		}
 	| ID '[' expression ']'
 		{ 
+			if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
+				fprintf(stderr,"Objects must be declared: [Object %s] is not defined\n",$1);
+				exit(1);
+			}
+			//fprintf(stderr,"\nCheck: %d \n",check_type(make_id(temp)));
+			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			if(check_type($3)!=INUM){
+				fprintf(stderr,"Array Access needs to be INTEGER\n");
+				exit(1);
+			}
 			$$ = make_tree(ARRAY_ACCESS,make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
 			//assert(temp!=NULL);
-			check_array($$,ARRAY_ACCESS); 
+			check_array($$); 
 		}
 	;
 
@@ -484,11 +495,16 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}
+			//fprintf(stderr,"\nCheck: %d \n",check_type(make_id(temp)));
+			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			if(check_type($3)!=INUM){
+				fprintf(stderr,"Array Access needs to be INTEGER\n");
+				exit(1);
+			}
 			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);
 			$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 			tree->scope_depth=depth;
-			check_array($$,ARRAY_ACCESS);
 		}
 	| INUM
 		{ $$ = make_inum($1); }

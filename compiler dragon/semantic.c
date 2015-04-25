@@ -30,6 +30,8 @@ int check_type(tree_t *expression){
 		case RNUM:
 			return expression->type;
 			break;
+		case ARRAY_ACCESS:
+			return expression->left->attribute.sval->type;
 		case ADDOP:
 			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1; 
 			break;
@@ -40,7 +42,7 @@ int check_type(tree_t *expression){
 			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1;
 			break;
 		default:
-			fprintf(stderr, "Wrong Type in Expression: %d\n",expression->type);
+			fprintf(stderr, "Wrong Type in Expression: %d ",expression->type);
 	}
 }
 
@@ -57,7 +59,7 @@ int equalArgs(tree_t *functionArgs,tree_t *functionTypes){
 	return 0;*/
 }
 
-void check_array(tree_t *array,int type){
+void check_array(tree_t *array){
 	
 }
 
