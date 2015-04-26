@@ -16,6 +16,5 @@ void check_duplicate(list_t *list);
 
 void check_array(tree_t *expression);
 
-list_t *exprlist(tree_t *t);
 
 #endif
