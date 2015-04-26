@@ -99,8 +99,8 @@
 %%
 
 program:
-	{ 
-		top_scope = scope_push(top_scope,"PROGRAM",FUNCTION);
+	{
+		top_scope = scope_push(top_scope,"PROGRAM",TYPE);
 		fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
 		temp=scope_insert(top_scope,"read");
 		temp->type=FUNCTION;
@@ -403,11 +403,12 @@ variable
 				fprintf(stderr,"Objects must be declared: [Object %s] is not defined\n",$1);
 				exit(1);
 			}
-			if(depth>0 && top_scope->type==FUNCTION){
+			//fprintf(stderr,"depth:%d",depth);
+			if(depth>0 && top_scope->type==FUNCTION && temp->mark!=FUNCTION){
 				fprintf(stderr,"Variable must be local to be assigned: [Object %s] is not local variable\n",$1);
 				exit(1);
 			}
-			$$ = make_id(temp));
+			$$ = make_id(temp);
 			//assert(temp!=NULL);
 		}
 	| ID '[' expression ']'
@@ -465,7 +466,10 @@ simple_expression
 		{ $$ = $1; }
 	| ADDOP term
 		{ 
-			//if(type(make_op(ADDOP,$2,NULL,NULL))==OR){ fprintf(stderr,"Unary Error: \n"); print_tree($$,0); }
+			if(ADDOP==OR){ 
+				fprintf(stderr,"Unary Error cannot have or of a number: \n"); 
+				exit(1);
+			}
 			$$ = make_op(ADDOP,$1,$2,NULL); 
 		}
 	| simple_expression ADDOP term
@@ -544,7 +548,6 @@ int main(){
 	temp=NULL;
 	tree=NULL;
 	subprogram=NULL;
-	depth=0;
 	yyparse();
 	fclose(assemble);
 }

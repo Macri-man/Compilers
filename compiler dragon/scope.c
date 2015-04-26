@@ -49,7 +49,7 @@ node_t *scope_search_all(scope_t *curr_scope,char *name,int *depth){
 	node_t *p;
 	for(curr_scope;curr_scope!=NULL;curr_scope=curr_scope->next){
 		p=scope_search(curr_scope,name);
-		depth+=1;
+		*depth+=1;
 		if(p!=NULL) return p;
 	}
 	return NULL;
@@ -57,7 +57,7 @@ node_t *scope_search_all(scope_t *curr_scope,char *name,int *depth){
 
 /* push new one */
 scope_t *scope_push(scope_t *top, char *name,int type){
-	scope_t *new_scope=make_scope(namem,type);
+	scope_t *new_scope=make_scope(name,type);
 	assert(new_scope!=NULL);
 	new_scope->next=top;
 	return new_scope;

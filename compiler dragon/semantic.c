@@ -82,7 +82,7 @@ int lengthArg(tree_t *args){
 
 	int num;
 	for(num=1;args!=NULL;num++,args=args->left){
-		fprintf(stderr, "%d:%d\n",num,args->type);
+		//fprintf(stderr, "\nNUMBER:%d ARG TYPE:%d\n",num,args->type);
 	}
 
 	return num;
@@ -94,24 +94,15 @@ int equalArgs(list_t *functionArgs,tree_t *expressionTypes){
 	node_t *temp=NULL;
 	for(list=functionArgs->next;list->next!=NULL;list=list->next);
 	temp=list->node;
-	//fprintf(stderr, "%s %s\n",temp->name,temp->next->name);
-	for(temp,tree=expressionTypes;temp!=NULL && tree!=NULL;temp=temp->next,tree=tree->left){
-		if(tree->left==NULL){
-			if(tree->type==ID){
-				if(tree->attribute.sval->type!=temp->type) return -1;
-				//fprintf(stderr, "tree:%d %s list%d %s\n",tree->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
-			}else{
-				if(tree->type!=temp->type) return -1;
-				//fprintf(stderr, "tree:%d list%d %s\n",tree->type,temp->type,temp->name);
-			}
+	fprintf(stderr, "%s %s\n",temp->name,temp->next->name);
+	for(temp,tree=expressionTypes;temp!=NULL && tree->type==EXPRLIST;temp=temp->next,tree=tree->left){
+		//fprintf(stderr, "TREE:%d\n",tree->type);
+		if(tree->left->type==EXPRLIST){
+			//fprintf(stderr, "tree:%d %s list%d %s\n",tree->right->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
+			if(check_type(tree)!=temp->type) return -1;
 		}else{
-			if(tree->right->type==ID){
-				if(tree->right->attribute.sval->type!=temp->type) return -1;
-				//fprintf(stderr, "tree:%d %s list:%d %s\n",tree->right->attribute.sval->type,tree->right->attribute.sval->name,temp->type,temp->name);
-			}else{
-				if(tree->right->type!=temp->type) return -1;
-				//fprintf(stderr, "tree:%d list%d %s\n",tree->right->type,temp->type,temp->name);
-			}
+			//fprintf(stderr, "tree:%d %s list%d %s\n",tree->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
+			if(check_type(tree->right)!=temp->type) return -1;
 		}
 	}
 	return 0;
@@ -126,13 +117,13 @@ void check_procedure(tree_t *procedure){
 	tree_t *expressionTypes;
 	node_t *funcID;
 
-	assert(function!=NULL);
-	funcID=function->left->attribute.sval;
+	assert(procedure!=NULL);
+	funcID=procedure->left->attribute.sval;
 	assert(funcID!=NULL&&funcID->mark==PROCEDURE);
 	functionArgs=funcID->args;
 
-	assert(function->right!=NULL);
-	expressionTypes=function->right;
+	assert(procedure->right!=NULL);
+	expressionTypes=procedure->right;
 	assert(expressionTypes->type==EXPRLIST);
 	if(num_list(functionArgs)!=lengthArg(expressionTypes)){
 		fprintf(stderr, "Wrong Number of Arguments\n");
