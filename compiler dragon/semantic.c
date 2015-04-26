@@ -32,6 +32,10 @@ int check_type(tree_t *expression){
 			break;
 		case ARRAY_ACCESS:
 			return expression->left->attribute.sval->type;
+		case FUNCTION_CALL:
+			return expression->left->attribute.sval->type;
+		case PROCEDURE:
+			return expression->left->attribute.sval->type;
 		case ADDOP:
 			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1; 
 			break;
@@ -46,47 +50,121 @@ int check_type(tree_t *expression){
 	}
 }
 
-int lengthArg(list_t *args){
-	return num_list(args);
-}
+void check_duplicate(list_t *list){
+	//fprintf(stderr, "%s\n", "DUPLICATES");
+	if(list == NULL) return ; // No list, no conflicts
+	if(list->next == NULL) return ; // One variable, no conflicts!
 
-int equalArgs(tree_t *functionArgs,tree_t *functionTypes){
-	/*tree_t *n1=NULL;
-	list_t *n2=NULL;
-	for(n1=functionArgs,n2=functionTypes->lval;n1!=NULL,n2!=NULL;n2=n2->next){
-		if(n1->type!=n2->type) return -1;
+	list_t *temp = list;
+	list_t *comp = list->next;
+
+	while(temp!=NULL){
+		for(comp;comp!=NULL;comp=comp->next){
+			if((temp->node->name != NULL) && (comp->node->name != NULL)){
+				//fprintf(stderr, "FIRST: %s  SECOND: %s\n",temp->node->name,comp->node->name);
+				if(!strcmp(temp->node->name, comp->node->name)){
+					fprintf(stderr," Variable redeclaration not allowed\n");
+					exit(1);
+				}
+			}
+		}
+		temp=temp->next;
+		if(temp->next!=NULL){
+			comp=temp->next;
+		}else{
+			return ;
+		}
+		//fprintf(stderr, "FIRST: %s  SECOND: %s\n",temp->node->name,comp->node->name);
 	}
-	return 0;*/
 }
 
-void check_array(tree_t *array){
+int lengthArg(tree_t *args){
+
+	int num;
+	for(num=1;args!=NULL;num++,args=args->left){
+		fprintf(stderr, "%d:%d\n",num,args->type);
+	}
+
+	return num;
+}
+
+int equalArgs(list_t *functionArgs,tree_t *expressionTypes){
+	tree_t *tree=NULL;
+	list_t *list=NULL;
+	node_t *temp=NULL;
+	for(list=functionArgs->next;list->next!=NULL;list=list->next);
+	temp=list->node;
+	//fprintf(stderr, "%s %s\n",temp->name,temp->next->name);
+	for(temp,tree=expressionTypes;temp!=NULL && tree!=NULL;temp=temp->next,tree=tree->left){
+		if(tree->left==NULL){
+			if(tree->type==ID){
+				if(tree->attribute.sval->type!=temp->type) return -1;
+				//fprintf(stderr, "tree:%d %s list%d %s\n",tree->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
+			}else{
+				if(tree->type!=temp->type) return -1;
+				//fprintf(stderr, "tree:%d list%d %s\n",tree->type,temp->type,temp->name);
+			}
+		}else{
+			if(tree->right->type==ID){
+				if(tree->right->attribute.sval->type!=temp->type) return -1;
+				//fprintf(stderr, "tree:%d %s list:%d %s\n",tree->right->attribute.sval->type,tree->right->attribute.sval->name,temp->type,temp->name);
+			}else{
+				if(tree->right->type!=temp->type) return -1;
+				//fprintf(stderr, "tree:%d list%d %s\n",tree->right->type,temp->type,temp->name);
+			}
+		}
+	}
+	return 0;
+}
+
+void check_array(tree_t *expression){
 	
 }
 
-void check_procedure(tree_t *procedure,int type){
-
-}
-
-void check_function(tree_t *function,int type){
-	/*node_t *functionArgs;
-	node_t *functionTypes;
-	tree_t *func;
+void check_procedure(tree_t *procedure){
+	list_t *functionArgs;
+	tree_t *expressionTypes;
+	node_t *funcID;
 
 	assert(function!=NULL);
-	func=function->left;
-	assert(func!=NULL&&func->type==FUNCTION);
-	assert(func->attribute.sval!=NULL&&func->attribute.sval->type==type);
-	functionArgs=func->attribute.sval;
+	funcID=function->left->attribute.sval;
+	assert(funcID!=NULL&&funcID->mark==PROCEDURE);
+	functionArgs=funcID->args;
 
-	assert(func->right!=NULL);
-	functionTypes=func->right;
-	assert(functionTypes->type==PARALIST);
-
-	if(functionArgs->numargs!=lengthArg(functionTypes)){
+	assert(function->right!=NULL);
+	expressionTypes=function->right;
+	assert(expressionTypes->type==EXPRLIST);
+	if(num_list(functionArgs)!=lengthArg(expressionTypes)){
 		fprintf(stderr, "Wrong Number of Arguments\n");
+		exit(1);
 	}
 
-	if(equalArgs(functionArgs,functionTypes)==-1){
+	if(equalArgs(functionArgs,expressionTypes)==-1){
 		fprintf(stderr, "Wrong Arguments Types\n");
-	}*/
+		exit(1);
+	}
+}
+
+void check_function(tree_t *function){
+	list_t *functionArgs;
+	tree_t *expressionTypes;
+	node_t *funcID;
+
+	assert(function!=NULL);
+	funcID=function->left->attribute.sval;
+	assert(funcID!=NULL&&funcID->mark==FUNCTION);
+	functionArgs=funcID->args;
+
+	assert(function->right!=NULL);
+	expressionTypes=function->right;
+	assert(expressionTypes->type==EXPRLIST);
+	if(num_list(functionArgs)!=lengthArg(expressionTypes)){
+		fprintf(stderr, "Wrong Number of Arguments\n");
+		exit(1);
+	}
+
+	if(equalArgs(functionArgs,expressionTypes)==-1){
+		fprintf(stderr, "Wrong Arguments Types\n");
+		exit(1);
+	}
 }

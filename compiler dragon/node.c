@@ -23,3 +23,12 @@ node_t *node_insert(node_t *head,char *name){
 	p->next=head;
 	return p;
 }
+
+void print_nodes(list_t *head){
+	list_t *temp=NULL;
+	node_t *p=NULL;
+	for(temp=head;temp->next!=NULL;temp=temp->next);
+	for(p=temp->node;p!=NULL;p=p->next){
+		fprintf(stderr, "\nNODES:%s",p->name);
+	}
+}

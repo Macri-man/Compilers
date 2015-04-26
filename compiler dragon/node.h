@@ -23,5 +23,6 @@ node_t *make_node(char *name);
 node_t *node_search(node_t *,char *);
 node_t *node_insert(node_t *,char *);
 
+void print_nodes(struct list_s *head);
 
 #endif

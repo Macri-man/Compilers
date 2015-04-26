@@ -30,6 +30,7 @@ list_t *list_append(list_t *head,list_t *list){
 		assert(head!=NULL && list!=NULL);
 		for(temp=head;temp->next!=NULL;temp=temp->next);
 		temp->next=list;
+		list->node->next=temp->node;
 	}
 	assert(head !=NULL);
 	return head;
@@ -67,7 +68,7 @@ void print_list(list_t *list){
 
 int num_list(list_t *head){
 	assert(head!=NULL);
-	int num=0;
+	int num=1;
 	list_t *temp=NULL;
 	for(temp=head;temp!=NULL;temp=temp->next){
 		num++;

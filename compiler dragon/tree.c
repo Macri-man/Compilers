@@ -111,6 +111,8 @@ tree_t *make_procedure(int type,tree_t *id,tree_t *arguments){
 */
 
 
+
+
 /* preorder */
 void print_tree(tree_t *t, int spaces){
 
@@ -124,7 +126,6 @@ void print_tree(tree_t *t, int spaces){
 		fprintf(stderr, " ");
 	}
 
-	/* process root */
 	switch(t->type){
 		case ID:
 			fprintf(stderr, "[ID:%s\n",(t->attribute.sval)->name);
@@ -222,19 +223,25 @@ void print_tree(tree_t *t, int spaces){
 			//fprintf(stderr, "LIST:");
 			break;
 		case IDLIST:
-			fprintf(stderr, "[IDLIST:");
-			id_list(t->attribute.lval);
-			fprintf(stderr, "\n");
+			if(t->attribute.lval!=NULL){
+				fprintf(stderr, "[IDLIST:");
+				id_list(t->attribute.lval);
+				fprintf(stderr, "\n");
+			}
 			break;
 		case ARGLIST:
-			fprintf(stderr, "[ARGLIST:");
-			list_print(t->attribute.lval);
-			fprintf(stderr, "\n");
+			if(t->attribute.lval!=NULL){
+				fprintf(stderr, "[ARGLIST:");
+				list_print(t->attribute.lval);
+				fprintf(stderr, "\n");
+			}
 			break;
 		case DECLIST:
-			fprintf(stderr, "[DECLIST:");
-			list_print(t->attribute.lval);
-			fprintf(stderr, "\n");
+			if(t->attribute.lval!=NULL){
+				fprintf(stderr, "[DECLIST:");
+				list_print(t->attribute.lval);
+				fprintf(stderr, "\n");
+			}
 			break;
 		case SUBDECLS: 
 			fprintf(stderr, "[SUBPROGRAM DECLARATIONS: \n");
@@ -249,7 +256,7 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[SUBPROGRAM DECLARATION BODY: \n");
 			break;
 		case PROGRAM:
-			fprintf(stderr, "[PROGRAM:\n");
+			fprintf(stderr, "[PROGRAM:");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
@@ -259,7 +266,6 @@ void print_tree(tree_t *t, int spaces){
 	print_tree(t->left,spaces+2);
 	/*go right */
 	print_tree(t->right,spaces+2);
-
 }
 
 
