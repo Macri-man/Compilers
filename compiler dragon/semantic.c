@@ -46,11 +46,11 @@ int check_type(tree_t *expression){
 			return (check_type(expression->left)==check_type(expression->right))? check_type(expression->left): -1;
 			break;
 		default:
-			fprintf(stderr, "Wrong Type in Expression: %d ",expression->type);
+			fprintf(error, "Wrong Type in Expression: %d ",expression->type);
 	}
 }
 
-void check_duplicate(list_t *list){
+void check_duplicate(list_t *list,struct scope_s *scope){
 	//fprintf(stderr, "%s\n", "DUPLICATES");
 	if(list == NULL) return ; // No list, no conflicts
 	if(list->next == NULL) return ; // One variable, no conflicts!
@@ -63,8 +63,8 @@ void check_duplicate(list_t *list){
 			if((temp->node->name != NULL) && (comp->node->name != NULL)){
 				//fprintf(stderr, "FIRST: %s  SECOND: %s\n",temp->node->name,comp->node->name);
 				if(!strcmp(temp->node->name, comp->node->name)){
-					fprintf(stderr," Variable redeclaration not allowed\n");
-					exit(1);
+					fprintf(error," Variable redeclaration not allowed: [Variable %s redeclared in Scoped of %s]\n",temp->node->name,scope->name);
+					//exit(1);
 				}
 			}
 		}
@@ -93,6 +93,7 @@ void lengthArg(tree_t *args,int *num){
 			break;
 		case ARRAY_ACCESS:
 			(*num)++;
+			break;
 		case FUNCTION_CALL:
 			(*num)++;
 			break;
@@ -112,8 +113,8 @@ void lengthArg(tree_t *args,int *num){
 			lengthArg(args->right,num);
 			break;
 		default:
-			fprintf(stderr, "Wrong Type in Expression: %d\n", args->type);
-			exit(1);
+			fprintf(error, "Wrong Type in Expression: %d\n", args->type);
+			//exit(1);
 	}
 
 }
@@ -152,54 +153,62 @@ void check_return(tree_t *expression){
 	}*/
 }
 
-void check_procedure(tree_t *procedure){
+void check_procedure(tree_t *procedure,char *name,char *scope){
 	list_t *functionArgs;
 	tree_t *expressionTypes;
 	node_t *funcID;
-	int length=1;
+	int length=0;
 	assert(procedure!=NULL);
 	funcID=procedure->left->attribute.sval;
 	assert(funcID!=NULL&&funcID->mark==PROCEDURE);
 	functionArgs=funcID->args;
 
-	assert(procedure->right!=NULL);
-	expressionTypes=procedure->right;
-	assert(expressionTypes!=NULL);
-	lengthArg(expressionTypes,&length);
-	//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
-	if(num_list(functionArgs)!=length){
-		fprintf(stderr, "Wrong Number of Arguments\n");
-		exit(1);
-	}
+	if(procedure->right==NULL){
+		fprintf(error, "Procdures needs parameters\n");
+	}else{
+		//assert(procedure->right!=NULL);
+		expressionTypes=procedure->right;
+		//assert(expressionTypes!=NULL);
+		lengthArg(expressionTypes,&length);
+		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
+		if(num_list(functionArgs)!=length){
+			fprintf(error, "In Procdure %s Wrong Number of Arguments %d in Scope %s\n",name,length,scope);
+			//exit(1);
+		}
 
-	if(equalArgs(functionArgs,expressionTypes)==-1){
-		fprintf(stderr, "Wrong Arguments Types\n");
-		exit(1);
+		if(equalArgs(functionArgs,expressionTypes)==-1){
+			fprintf(error, "In Procdure %s Wrong Arguments Types in Scope %s\n",name,scope);
+			//exit(1);
+		}
 	}
 }
 
-void check_function(tree_t *function){
+void check_function(tree_t *function,char *name,char *scope){
 	list_t *functionArgs;
 	tree_t *expressionTypes;
 	node_t *funcID;
-	int length=1;
+	int length=0;
 	assert(function!=NULL);
 	funcID=function->left->attribute.sval;
 	assert(funcID!=NULL&&funcID->mark==FUNCTION);
 	functionArgs=funcID->args;
 
-	assert(function->right!=NULL);
-	expressionTypes=function->right;
-	assert(expressionTypes!=NULL);
-	lengthArg(expressionTypes,&length);
-	//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
-	if(num_list(functionArgs)!=length){
-		fprintf(stderr, "Wrong Number of Arguments\n");
-		exit(1);
-	}
+	//assert(function->right!=NULL);
+	if(function->right==NULL){
+		fprintf(error, "Functions needs parameters\n");
+	}else{
+		expressionTypes=function->right;
+		//assert(expressionTypes!=NULL);
+		lengthArg(expressionTypes,&length);
+		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
+		if(num_list(functionArgs)!=length){
+			fprintf(error, "In Function %s Wrong Number of Arguments %d in Scope %s\n",name,length,scope);
+			//exit(1);
+		}
 
-	if(equalArgs(functionArgs,expressionTypes)==-1){
-		fprintf(stderr, "Wrong Arguments Types\n");
-		exit(1);
+		if(equalArgs(functionArgs,expressionTypes)==-1){
+			fprintf(error, "In Function %s Wrong Arguments Types in Scope %s\n",name,scope);
+			//exit(1);
+		}
 	}
 }

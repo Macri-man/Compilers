@@ -68,7 +68,7 @@ void print_list(list_t *list){
 
 int num_list(list_t *head){
 	assert(head!=NULL);
-	int num=1;
+	int num=0;
 	list_t *temp=NULL;
 	for(temp=head;temp!=NULL;temp=temp->next){
 		num++;

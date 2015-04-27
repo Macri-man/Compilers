@@ -14,6 +14,7 @@ typedef struct node_s{
 	}semantics;
 
 	int offset;
+	int depth;
 	struct list_s *args;
 	struct node_s *next;
 }node_t;
@@ -21,7 +22,7 @@ typedef struct node_s{
 node_t *make_node(char *name);
 
 node_t *node_search(node_t *,char *);
-node_t *node_insert(node_t *,char *);
+node_t *node_insert(node_t *,char *,int offset);
 
 void print_nodes(struct list_s *head);
 

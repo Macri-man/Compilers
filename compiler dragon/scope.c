@@ -7,14 +7,15 @@
 /*constructor */
 scope_t *make_scope(char *name,int type){
 	int i;
-	scope_t *p=(scope_t *)malloc(sizeof(scope_t));
+	scope_t *scope=(scope_t *)malloc(sizeof(scope_t));
 	for(i=0;i<HASH_SIZE;i++){
-		p->table[i]=NULL;
+		scope->table[i]=NULL;
 	}
-	p->name=strdup(name);
-	p->type=type,
-	p->next=NULL;
-	return p;
+	scope->name=strdup(name);
+	scope->type=type,
+	scope->argoffset=8;
+	scope->next=NULL;
+	return scope;
 }
 
 /* local search */
@@ -31,27 +32,45 @@ node_t *scope_search(scope_t *scope,char *name){
 }
 
 /* local insert */
-node_t *scope_insert(scope_t *scope,char *name){
+node_t *scope_insert(scope_t *scope,char *name,int argorlocal){
 	
 	int index;
 	node_t *head;
+	int offset;
 
 	if(scope!=NULL){
 		index=hash_pjw(name);
 		head=scope->table[index];
-		return scope->table[index]=node_insert(head,name);
+		switch(argorlocal) {
+			case -1: 
+				offset = scope->localoffset -= 8; 	
+				break;
+			case 0 : 
+				offset = 0;                 		
+				break;
+			case 1 : 
+				offset = scope->argoffset += 8;		
+				break;
+		}
+		return scope->table[index]=node_insert(head,name,offset);
 	}else return NULL;
 }
 
 /* gloabl search */
-node_t *scope_search_all(scope_t *curr_scope,char *name,int *depth){
+node_t *scope_search_all(scope_t *scope,char *name,int *depth){
 
-	node_t *p;
-	for(curr_scope;curr_scope!=NULL;curr_scope=curr_scope->next){
-		p=scope_search(curr_scope,name);
-		*depth+=1;
-		if(p!=NULL) return p;
+	node_t *node;
+	for(scope;scope!=NULL;scope=scope->next){
+		node=scope_search(scope,name);
+		//(*depth)++;
+		if(node!=NULL){
+			node->depth=(*depth);
+			(*depth)=0;
+			return node;
+		}
+		(*depth)++;
 	}
+	(*depth)=0;
 	return NULL;
 }
 

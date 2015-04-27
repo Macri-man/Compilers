@@ -4,31 +4,31 @@
 #include "node.h"
 
 node_t *make_node(char *name){
-	node_t *p=(node_t*)malloc(sizeof(node_t));
-	p->name=strdup(name);
-	return p;
+	node_t *node=(node_t*)calloc(1,sizeof(node_t));
+	node->name=strdup(name);
+	return node;
 }
 
 node_t *node_search(node_t *head,char *name){
-	node_t *p=NULL;
-	for(p=head;p!=NULL;p=p->next){
-		if(!strcmp(p->name,name))return p;
+	node_t *node=NULL;
+	for(node=head;node!=NULL;node=node->next){
+		if(!strcmp(node->name,name))return node;
 	}
 	return NULL;
 }
 
-node_t *node_insert(node_t *head,char *name){
-	node_t *p=make_node(name);
-
-	p->next=head;
-	return p;
+node_t *node_insert(node_t *head,char *name,int offset){
+	node_t *node=make_node(name);
+	node->offset=offset;
+	node->next=head;
+	return node;
 }
 
 void print_nodes(list_t *head){
 	list_t *temp=NULL;
-	node_t *p=NULL;
+	node_t *node=NULL;
 	for(temp=head;temp->next!=NULL;temp=temp->next);
-	for(p=temp->node;p!=NULL;p=p->next){
-		fprintf(stderr, "\nNODES:%s",p->name);
+	for(node=temp->node;node!=NULL;node=node->next){
+		fprintf(stderr, "\nNODES:%s",node->name);
 	}
 }

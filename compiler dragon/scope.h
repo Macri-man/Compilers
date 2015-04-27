@@ -10,7 +10,8 @@ typedef struct scope_s{
 	node_t *table[HASH_SIZE];
 	char *name;
 	int type;
-	int scope_offset;
+	int argoffset;
+	int localoffset;
 	struct scope_s *next;
 }scope_t;
 
@@ -18,7 +19,7 @@ scope_t *make_scope(char *name,int type);
 
 /* basic search and insert */
 node_t *scope_search(scope_t *head,char *name);
-node_t *scope_insert(scope_t *head,char *name);
+node_t *scope_insert(scope_t *head,char *name,int argorlocal);
 
 node_t *scope_search_all(scope_t *head,char *name,int *depth);
 
