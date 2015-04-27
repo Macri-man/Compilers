@@ -295,7 +295,7 @@ parameter_list
 
 compound_statement
 	: BBEGIN optional_statements END
-		{ 
+		{
 			if(top_scope->type==FUNCTION){
 				if($2==NULL){
 					fprintf(stderr,"Functions must have a return statement \n");
