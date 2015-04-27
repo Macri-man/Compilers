@@ -5,7 +5,7 @@
 #include "scope.h"
 
 /*constructor */
-scope_t *make_scope(char *name,type){
+scope_t *make_scope(char *name,int type){
 	int i;
 	scope_t *p=(scope_t *)malloc(sizeof(scope_t));
 	for(i=0;i<HASH_SIZE;i++){

@@ -43,6 +43,8 @@ comment     \(\*.*\*\)
 "then"			{ echo("THEN "); return THEN; }
 "for"			{ echo("FOR "); return FOR; }
 "to"			{ echo("TO "); return TO; }
+"read"			{ echo("READ "); yylval.sval = strdup(yytext); return READ; }
+"write"			{ echo("WRITE "); yylval.sval = strdup(yytext); return WRITE; }
 
 ".."	{ echo("DOTDOT "); return DOTDOT; }
 ":="	{ echo("ASSIGNOP "); return ASSIGNOP; }

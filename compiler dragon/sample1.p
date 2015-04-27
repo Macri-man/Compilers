@@ -1,12 +1,12 @@
-(* ERROR: function passed wrong number/type of arguments *)
+(* dangling ELSE binds to closest IF *)
 program main( input, output );
-  var b: integer;
-  var y: real;
-
-  function foo(a: integer; x: real): integer;
-  begin
-    foo := a
-  end;
+  var a: integer;
 begin
-  b := foo(y,b) + foo(b,y,10)
+  read(a);
+  if ( a < 10 ) then
+    if ( a >= 10 ) then
+      a := 1
+  else
+      a := 0;
+  write(a)
 end.

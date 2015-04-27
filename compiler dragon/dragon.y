@@ -55,7 +55,8 @@
 %token VAR
 %token ARRAY OF DOTDOT
 %token INTEGER REAL CHAR STRING BOOLEAN
-%token FUNCTION PROCEDURE READ WRITE
+%token FUNCTION PROCEDURE
+%token <sval> READ WRITE
 %token BBEGIN END
 %token IF THEN ELSE
 %token WHILE DO FOR TO
@@ -100,14 +101,14 @@
 
 program:
 	{
-		top_scope = scope_push(top_scope,"PROGRAM",TYPE);
+		top_scope = scope_push(top_scope,"PROGRAM",PROGRAM);
 		fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
 		temp=scope_insert(top_scope,"read");
-		temp->type=FUNCTION;
+		temp->type=PROCEDURE;
 		temp->mark=READ;
 		temp=scope_insert(top_scope,"write");
 		temp->type=FUNCTION;
-		temp->mark=WRITE;
+		temp->mark=PROCEDURE;
 	}
 	PROGRAM ID '(' identifier_list ')' ';'
 	declarations
@@ -204,6 +205,10 @@ subprogram_declaration
 subprogram_head:
 	FUNCTION ID 
 		{	
+			if(scope_search_all(top_scope, $2, &depth)!=NULL){
+				fprintf(stderr,"Function name redeclared\n");
+				exit(1);
+			}
 			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
 			assert(subprogram = scope_insert(top_scope,$2));
 			//fprintf(stderr,"\n[SCOPE %s] subprogram: %s\n",top_scope->name,subprogram->name);
@@ -234,6 +239,10 @@ subprogram_head:
 	| 	
 		PROCEDURE ID
 		{
+			if(scope_search_all(top_scope, $2,&depth)!=NULL){
+				fprintf(stderr,"Procedure name redeclared\n");
+				exit(1);
+			}
 			//insert ID into scope
 			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
 			assert(subprogram = scope_insert(top_scope,$2));
@@ -292,7 +301,15 @@ parameter_list
 
 compound_statement
 	: BBEGIN optional_statements END
-		{ $$ = $2; }
+		{ 
+			if(top_scope->type==FUNCTION){
+				if($2==NULL){
+					fprintf(stderr,"Functions Must have a return statement \n");
+					exit(1);
+				}
+			}
+			$$ = $2;
+		}
 	;
 
 optional_statements
@@ -324,14 +341,25 @@ conditions
 			//check type of variable == type of expression
 			//fprintf(stderr,"\nCheck: %d \n",check_type($1));
 			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
-			if(check_type($3)==PROCEDURE){
+			/*if(check_type($3)==PROCEDURE){
 				fprintf(stderr,"Procedures cannot return values\n");
 				exit(1);
-			}
+			}*/
+
 			if(check_type($1)!=check_type($3)){
 				fprintf(stderr,"Mismatch Types\n");
 				exit(1);
 			}
+
+			if(top_scope->type==FUNCTION){
+				if($1->type==ID){
+					if($1->attribute.sval->mark==FUNCTION && $3==NULL){
+						fprintf(stderr,"Functions must have a return statement \n");
+						exit(1);
+					}
+				}
+			}
+			
 			$$ = make_tree(ASSIGNOP,$1,$3); 
 		}
 	| procedure_statement
@@ -423,7 +451,7 @@ variable
 				fprintf(stderr,"Array Access needs to be INTEGER\n");
 				exit(1);
 			}
-			$$ = make_tree(ARRAY_ACCESS,make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
+			$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
 			//assert(temp!=NULL);
 			check_array($$); 
 		}
@@ -433,7 +461,7 @@ procedure_statement
 	: ID
 	 	{ 
 	 		//search ID and check if valid procedure call
-	 		$$ = make_tree(PROCEDURE,tree=make_id(scope_search_all(top_scope,$1,&depth)),NULL);
+	 		$$ = make_tree(PROCEDURE,tree=make_id(temp=scope_search_all(top_scope,$1,&depth)),NULL);
 	 		tree->type=NAME;
 	 	}
 	| ID '(' expression_list ')'
@@ -442,6 +470,24 @@ procedure_statement
 			$$ = make_tree(PROCEDURE,tree=make_id(scope_search_all(top_scope,$1,&depth)),$3);
 			tree->type=NAME;
 			check_procedure($$);
+		}
+	| WRITE '(' expression_list ')'
+		{
+			temp=make_node($1);
+			temp->type=FUNCTION;
+			temp->mark=WRITE;
+			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
+			tree->type=NAME;
+		}
+
+	| READ '(' expression_list ')'
+
+		{	
+			temp=make_node($1);
+			temp->type=FUNCTION;
+			temp->mark=READ;
+			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
+			tree->type=NAME;
 		}
 	;
 
@@ -500,7 +546,10 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}
-			//temp=scope_search_all(top_scope,$1,&depth);
+			if(temp->mark==PROCEDURE){
+				fprintf(stderr,"Procedures cannot return values\n");
+				exit(1);
+			}
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s %d",top_scope->name,$1,temp->name,temp->type);
 			$$ = make_tree(FUNCTION_CALL,tree=make_id(temp),$3);
 			tree->type=NAME;

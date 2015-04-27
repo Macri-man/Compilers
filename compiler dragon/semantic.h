@@ -5,7 +5,7 @@ void check_function(tree_t *function);
 void check_procedure(tree_t *procedure);
 void check_array(tree_t *array);
 
-int lengthArg(tree_t *args);
+void lengthArg(tree_t *args,int *num);
 int equalArgs(list_t *args1,tree_t *args2);
 
 int type(tree_t *expression);
@@ -16,5 +16,7 @@ void check_duplicate(list_t *list);
 
 void check_array(tree_t *expression);
 
+
+void check_return(tree_t *expression);
 
 #endif

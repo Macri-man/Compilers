@@ -121,7 +121,7 @@ void print_tree(tree_t *t, int spaces){
 	if(t == NULL){
 		return;
 	}
-
+	//fprintf(stderr, "SPACES:%d\n",spaces);
 	for(i=0;i<spaces;i++){
 		fprintf(stderr, " ");
 	}
@@ -202,10 +202,10 @@ void print_tree(tree_t *t, int spaces){
 			fprintf(stderr, "[ARRAY RANGE:\n");
 			break;
 		case FUNCTION: 
-			fprintf(stderr, "[FUNCTION: \n");
+			fprintf(stderr, "[FUNCTION: ");
 			break;
 		case FUNCTION_CALL: 
-			fprintf(stderr, "[FUNCTION CALL: \n");
+			fprintf(stderr, "[FUNCTION CALL: ");
 			break;
 		case PROCEDURE: 
 			fprintf(stderr, "[PROCEDURE: \n");
@@ -238,34 +238,35 @@ void print_tree(tree_t *t, int spaces){
 			break;
 		case DECLIST:
 			if(t->attribute.lval!=NULL){
-				fprintf(stderr, "[DECLIST:");
+				fprintf(stderr, "[DECLIST:\n");
 				list_print(t->attribute.lval);
 				fprintf(stderr, "\n");
 			}
 			break;
 		case SUBDECLS: 
-			fprintf(stderr, "[SUBPROGRAM DECLARATIONS: \n");
+			//fprintf(stderr, "[SUBPROGRAM DECLARATIONS: \n");
 			break;
 		case SUBDECL: 
 			fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
 			break;
 		case SUBPROGDECL: 
-			fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
+			//fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
 			break;
 		case SUBPROGDECLBODY: 
 			fprintf(stderr, "[SUBPROGRAM DECLARATION BODY: \n");
 			break;
 		case PROGRAM:
-			fprintf(stderr, "[PROGRAM:");
+			fprintf(stderr, "[PROGRAM: \n");
+			//spaces+=2;
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
 	//fprintf(stderr, "\n");
 	/* go left */
-	print_tree(t->left,spaces+2);
+	print_tree(t->left,spaces);
 	/*go right */
-	print_tree(t->right,spaces+2);
+	print_tree(t->right,spaces);
 }
 
 
@@ -312,10 +313,10 @@ void print_mark(int mark){
 			fprintf(stderr, " WRITE ");
 			break;
 		case INUM:
-			fprintf(stderr, " INUM]");
+			fprintf(stderr, " INTEGER ");
 			break;
 		case RNUM:
-			fprintf(stderr, " RNUM]");
+			fprintf(stderr, " REAL ");
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
@@ -345,7 +346,7 @@ void print_type(int type){
 			fprintf(stderr, " WRITE]");
 			break;
 		case PROCEDURE:
-			fprintf(stderr, " PROCEDURE] ");
+			fprintf(stderr, " PROCEDURE]");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
