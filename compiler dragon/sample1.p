@@ -1,12 +1,8 @@
-(* dangling ELSE binds to closest IF *)
+(* ERROR: function missing return statement *)
 program main( input, output );
-  var a: integer;
+  function foo(a: integer): integer;
+  begin
+  end;
 begin
-  read(a);
-  if ( a < 10 ) then
-    if ( a >= 10 ) then
-      a := 1
-  else
-      a := 0;
-  write(a)
 end.
+

@@ -103,12 +103,6 @@ program:
 	{
 		top_scope = scope_push(top_scope,"PROGRAM",PROGRAM);
 		fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
-		temp=scope_insert(top_scope,"read");
-		temp->type=PROCEDURE;
-		temp->mark=READ;
-		temp=scope_insert(top_scope,"write");
-		temp->type=FUNCTION;
-		temp->mark=PROCEDURE;
 	}
 	PROGRAM ID '(' identifier_list ')' ';'
 	declarations
@@ -304,7 +298,7 @@ compound_statement
 		{ 
 			if(top_scope->type==FUNCTION){
 				if($2==NULL){
-					fprintf(stderr,"Functions Must have a return statement \n");
+					fprintf(stderr,"Functions must have a return statement \n");
 					exit(1);
 				}
 			}
@@ -476,16 +470,21 @@ procedure_statement
 			temp=make_node($1);
 			temp->type=FUNCTION;
 			temp->mark=WRITE;
+			if(check_type($3)!=INUM && check_type($3)!=RNUM){
+				fprintf(stderr,"Write need to be called with INTEGER or REALS");
+			}
 			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
 			tree->type=NAME;
 		}
 
 	| READ '(' expression_list ')'
-
-		{	
+		{
 			temp=make_node($1);
 			temp->type=FUNCTION;
 			temp->mark=READ;
+			if(check_type($3)!=INUM && check_type($3)!=RNUM){
+				fprintf(stderr,"Read need to be called with INTEGER or REALS");
+			}
 			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
 			tree->type=NAME;
 		}
