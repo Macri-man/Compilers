@@ -534,7 +534,11 @@ factor
 				fprintf(stderr,"Name %s used but not defined\n",$1);
 				exit(1);
 			}
-			//temp=scope_search_all(top_scope,$1,&depth);
+
+			if(temp->mark==PROCEDURE){
+				fprintf(stderr,"Procedures cannot return values\n");
+				exit(1);
+			}
 			$$ = tree = make_id(temp);
 			tree->scope_depth=depth; 
 		}

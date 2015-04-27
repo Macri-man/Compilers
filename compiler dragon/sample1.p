@@ -1,8 +1,11 @@
-(* ERROR: function missing return statement *)
+(* LEGAL: non-local names visible from inner scopes *)
 program main( input, output );
-  function foo(a: integer): integer;
+  var a: integer;
+  procedure boo(x: integer);
   begin
+    a := x
   end;
 begin
+  boo(a)
 end.
 
