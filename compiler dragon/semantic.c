@@ -191,6 +191,8 @@ void check_function(tree_t *function){
 	assert(function->right!=NULL);
 	expressionTypes=function->right;
 	assert(expressionTypes!=NULL);
+	lengthArg(expressionTypes,&length);
+	//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
 	if(num_list(functionArgs)!=length){
 		fprintf(stderr, "Wrong Number of Arguments\n");
 		exit(1);

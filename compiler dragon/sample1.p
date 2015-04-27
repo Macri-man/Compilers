@@ -1,11 +1,13 @@
-(* LEGAL: non-local names visible from inner scopes *)
+(* ERROR: function passed wrong number/type of arguments *)
 program main( input, output );
-  var a: integer;
-  procedure boo(x: integer);
+  var b: integer;
+  var y: real;
+
+  function foo(a: integer; x: real): integer;
   begin
-    a := x
+    foo := a
   end;
 begin
-  boo(a)
+  b := foo(y,b) + foo(b,y,10)
 end.
 
