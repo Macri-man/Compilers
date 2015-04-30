@@ -7,6 +7,7 @@
 #include "y.tab.h"
 
 extern int line_number;
+extern int assert;
 
 int type(tree_t *expression){
 	/*if(expression->type==ARRAY_ACCESS){
@@ -65,8 +66,12 @@ void check_duplicate(list_t *list,struct scope_s *scope){
 			if((temp->node->name != NULL) && (comp->node->name != NULL)){
 				//fprintf(stderr, "FIRST: %s  SECOND: %s\n",temp->node->name,comp->node->name);
 				if(!strcmp(temp->node->name, comp->node->name)){
+					if(assert!=0){
 					fprintf(error," Variable redeclaration not allowed: [Variable %s redeclared in Scoped of %s] on line: %d\n",temp->node->name,scope->name,line_number);
-					//exit(1);
+					}else{
+					fprintf(stderr," Variable redeclaration not allowed: [Variable %s redeclared in Scoped of %s] on line: %d\n",temp->node->name,scope->name,line_number);
+					exit(1);
+					}
 				}
 			}
 		}
@@ -132,7 +137,12 @@ void check_procedure(tree_t *procedure,char *name,char *scope){
 	functionArgs=funcID->args;
 
 	if(procedure->right==NULL){
+		if(assert!=0){
 		fprintf(error, "Procdures needs parameters\n");
+		}else{
+		fprintf(error, "Procdures needs parameters\n");
+		exit(1);
+		}
 	}else{
 		//assert(procedure->right!=NULL);
 		expressionTypes=procedure->right;
@@ -140,13 +150,21 @@ void check_procedure(tree_t *procedure,char *name,char *scope){
 		length=lengthArg(expressionTypes);
 		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
 		if(num_list(functionArgs)!=length){
+			if(assert!=0){
 			fprintf(error, "In Procdure %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
-			//exit(1);
+			}else{
+			fprintf(stderr, "In Procdure %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
+			exit(1);
+			}
 		}
 
 		if(equalArgs(functionArgs,expressionTypes)==-1){
+			if(assert!=0){
 			fprintf(error, "In Procdure %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
-			//exit(1);
+			}else{
+			fprintf(stderr, "In Procdure %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
+			exit(1);
+			}
 		}
 	}
 }
@@ -163,20 +181,33 @@ void check_function(tree_t *function,char *name,char *scope){
 
 	//assert(function->right!=NULL);
 	if(function->right==NULL){
+		if(assert!=0){
 		fprintf(error, "Functions needs parameters\n");
+		}else{
+			fprintf(stderr, "Functions needs parameters\n");
+			exit(1);
+		}
 	}else{
 		expressionTypes=function->right;
 		//assert(expressionTypes!=NULL);
 		length=lengthArg(expressionTypes);
 		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
 		if(num_list(functionArgs)!=length){
+			if(assert!=0){
 			fprintf(error, "In Function Call %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
-			//exit(1);
+			}else{
+			fprintf(stderr, "In Function Call %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
+			exit(1);
+			}
 		}
 
 		if(equalArgs(functionArgs,expressionTypes)==-1){
+			if(assert!=0){
 			fprintf(error, "In Function Call %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
-			//exit(1);
+			}else{
+			fprintf(stderr, "In Function Call %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
+			exit(1);
+			}
 		}
 	}
 }

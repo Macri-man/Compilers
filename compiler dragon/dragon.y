@@ -23,6 +23,7 @@
 	int nogen;
 	int arglocaloffset;
 	int depth;
+	int assert;
 	FILE * assemble;
 	FILE * error;
 
@@ -228,8 +229,12 @@ subprogram_head:
 	FUNCTION ID 
 		{	
 			if(scope_search_all(top_scope, $2, &depth)!=NULL){
-				fprintf(error,"Function name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Function name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
+				}else{
+					fprintf(stderr,"Function name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
+					exit(1);
+				}
 			}
 			if(nogen==0){
 				genstack($2);
@@ -269,8 +274,12 @@ subprogram_head:
 		PROCEDURE ID
 		{
 			if(scope_search_all(top_scope, $2,&depth)!=NULL){
-				fprintf(error,"Procedure name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Procedure name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
+				}else{
+					fprintf(stderr,"Procedure name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
+					exit(1);
+				}
 			}
 			if(nogen==0){
 				genstack($2);
@@ -343,8 +352,12 @@ compound_statement
 			if(top_scope->type==FUNCTION){
 				if($2==NULL){
 					temp=scope_search_all(top_scope,top_scope->name,&depth);
-					fprintf(error,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",temp->name,line_number);
-					//exit(1);
+					if(assert!=0){
+						fprintf(error,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",temp->name,line_number);
+					}else{
+						fprintf(stderr,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",temp->name,line_number);
+						exit(1);
+					}
 				}
 			}
 			$$=$2;
@@ -406,23 +419,36 @@ conditions
 						}
 						//(strcmp(name1,"INTEGER")!=0)? "REAL":"INTEGER"
 						if($1->type==ARRAY_ACCESS){
+							if(assert!=0){
 							fprintf(error,"Mismatch Types in assignment: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",$1->left->attribute.sval->name,name1,name1,line_number);
+							}else{
+							fprintf(stderr,"Mismatch Types in assignment: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",$1->left->attribute.sval->name,name1,name1,line_number);
+							exit(1);
+							}
 						}else{
+						if(assert!=0){
 							fprintf(error,"Mismatch Types in assignment: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",$1->attribute.sval->name,name1,name1,line_number);
+						}else{
+							fprintf(stderr,"Mismatch Types in assignment: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",$1->attribute.sval->name,name1,name1,line_number);
+							exit(1);
 						}
 						//exit(1);
 					}
+				}
 
 					if(top_scope->type==FUNCTION){
 						if($1->type==ID){
 							if($1->attribute.sval->mark==FUNCTION && $3==NULL){
-								fprintf(error,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",$1->attribute.sval->name,line_number);
-								//exit(1);
-							}
+								if(assert!=0){
+									fprintf(error,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",$1->attribute.sval->name,line_number);
+								}else{
+									fprintf(stderr,"Functions must have a return statement. Function %s does not have a return type on line: %d \n",$1->attribute.sval->name,line_number);
+									exit(1);
+								}
+							}	
 						}
 					}
 				}
-			
 			$$ = make_tree(ASSIGNOP,$1,$3); 
 			if(nogen==0){
 				genstatements($$);
@@ -437,8 +463,12 @@ conditions
 			//check type of expression for boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); }
 			if($2->type!=RELOP){
-				fprintf(error,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
+				}else{
+					fprintf(stderr,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
+					exit(1);
+				}
 			} 
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,make_tree(ELSE,$6,NULL))); 
 			if(nogen==0){
@@ -448,8 +478,12 @@ conditions
 	| WHILE expression DO conditions
 		{ 
 			if($2->type!=RELOP){
-				fprintf(error,"Expression in While needs to be Boolean on line: %d\n",line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Expression in While needs to be Boolean on line: %d\n",line_number);
+				}else{
+					fprintf(stderr,"Expression in While needs to be Boolean on line: %d\n",line_number);
+					exit(1);
+				}
 			} 
 			//check if expression is type boolean
 			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
@@ -481,11 +515,20 @@ conditions
 							fprintf(error, "Wrong Type in Expression\n");
 					}
 				if(temp->type==ARRAY_ACCESS){
-					fprintf(error,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+					if(assert!=0){
+						fprintf(error,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+					}else{
+						fprintf(stderr,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+						exit(1);
+					}
 				}else{
-					fprintf(error,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+					if(assert!=0){
+						fprintf(error,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+					}else{
+						fprintf(stderr,"Mismatch Types in FOR: [Variable %s is type %s] [Expression is not type %s] on line: %d\n",temp->name,name1,name1,line_number);
+						exit(1);
+					}
 				}
-				//exit(1);
 			}
 			//if(type(make_id(temp))!=type($4)){ fprintf(stderr,"Boolean Error: \n"); } 
 			//if(type(make_id(temp))!=type($6)){ fprintf(stderr,"Boolean Error: \n"); }
@@ -497,8 +540,12 @@ ifelse
 	: IF expression THEN statement
 		{
 			if($2->type!=RELOP){
+				 if(assert!=0){
 				fprintf(error,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
+				exit(1);
+				}
 			} 
 			//check type of expresion is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
@@ -510,8 +557,12 @@ ifelse
 	| IF expression THEN conditions ELSE ifelse
 		{
 			if($2->type!=RELOP){
+				if(assert!=0){
 				fprintf(error,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"IF statements expression Expression needs to be Boolean on line: %d\n",line_number);
+				exit(1);
+				}
 			} 
 			//check type of expression is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
@@ -527,15 +578,23 @@ variable
 	: ID
 		{ 	
 			if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
-				fprintf(error,"Variables must be declared: [Variable %s] is not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Variables must be declared: [Variable %s] is not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				}else{
+					fprintf(stderr,"Variables must be declared: [Variable %s] is not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					exit(1);
+				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_id(temp);
 			}else if(temp->depth>0 && top_scope->type==FUNCTION && temp->mark!=FUNCTION){
-				fprintf(error,"Variable must be local to be assigned: [Variable %s] is not local variable in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Variable must be local to be assigned: [Variable %s] is not local variable in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				}else{
+					fprintf(stderr,"Variable must be local to be assigned: [Variable %s] is not local variable in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					exit(1);
+				}
 				$$ = make_id(temp);
 			}else{ 
 				$$ = make_id(temp);
@@ -544,15 +603,23 @@ variable
 	| ID '[' expression ']'
 		{
 			if((temp=scope_search_all(top_scope,$1,&depth))==NULL){
+				if(assert!=0){
 				fprintf(error,"Arrays must be declared: Array %s is not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"Arrays must be declared: Array %s is not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				exit(1);
+				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
 			}else if(check_type($3)!=INUM){
+				if(assert!=0){
 				fprintf(error,"Array Access %s needs to be INTEGER on line: %d\n",temp->name,line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"Array Access %s needs to be INTEGER on line: %d\n",temp->name,line_number);
+				exit(1);
+				}
 				$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
 			}else{
 				$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
@@ -574,7 +641,9 @@ procedure_statement
 			$$ = make_tree(PROCEDURE,tree=make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
 			tree->type=NAME;
 			check_procedure($$,temp->name,top_scope->name);
-			genstatements($$);
+			if(nogen==0){
+				genstatements($$);
+			}
 		}
 	| WRITE '(' expression_list ')'
 		{
@@ -629,8 +698,12 @@ simple_expression
 	| ADDOP term
 		{ 
 			if(ADDOP==OR){ 
-				fprintf(error,"Unary Error cannot have or of a number on line: %d\n",line_number); 
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Unary Error cannot have or of a number on line: %d\n",line_number); 
+				}else{
+					fprintf(stderr,"Unary Error cannot have or of a number on line: %d\n",line_number);
+					exit(1);
+				}
 			}
 			$$ = make_op(ADDOP,$1,$2,NULL); 
 		}
@@ -648,16 +721,24 @@ term
 factor
 	: ID {
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
+				if(assert!=0){
 				fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				exit(1);
+				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = tree = make_id(temp);
 				tree->scope_depth=depth;
 			}else if(temp->mark==PROCEDURE){
+			if(assert!=0){
 				fprintf(error,"Procedures cannot return values on line: %d\n",line_number);
-				//exit(1);
+				}else{
+				fprintf(stderr,"Procedures cannot return values on line: %d\n",line_number);
+				exit(1);
+				}
 				$$ = tree = make_id(temp);
 				tree->scope_depth=depth;
 			}else{
@@ -670,16 +751,24 @@ factor
 			//fprintf(stderr,"id %s\n",$1);
 			//check if valid function call
 			if((temp=scope_search(top_scope,$1)) == NULL){
-				fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				}else{
+				 	fprintf(stderr,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					exit(1);
+				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_tree(FUNCTION_CALL,tree=make_id(temp),$3);
 				tree->type=NAME;
 			}else if(temp->mark==PROCEDURE){
-				fprintf(error,"Procedures cannot return values\n");
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Procedures cannot return values\n");
+				}else{
+					fprintf(stderr,"Procedures cannot return values\n");
+					exit(1);
+				}
 				$$ = make_tree(FUNCTION_CALL,tree=make_id(temp),$3);
 				tree->type=NAME;
 			}else{
@@ -693,15 +782,23 @@ factor
 		{ 
 			//check if valid array access
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
-				fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				}else{
+					fprintf(stderr,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					exit(1);
+				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 			}else if(check_type($3)!=INUM){
-				fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
-				//exit(1);
+				if(assert!=0){
+					fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
+				}else{
+					fprintf(stderr,"Array Access needs to be INTEGER on line: %d\n",line_number);
+					exit(1);
+				}
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 				tree->scope_depth=depth;
 			}else{
@@ -730,8 +827,18 @@ node_t *subprogram;
 int depth;
 int arglocaloffset;
 int main(int argc, char ** argv){
-	fprintf(stderr,"codegen %d",nogen);
+//	fprintf(stderr,"codegen %d",nogen);
+	if(argv[1]==NULL){
+		fprintf(stderr,"Need codegen args -n for no code gen -c for code gen\n");
+		exit(1);
+	}
+	if(argv[2]==NULL){
+		fprintf(stderr,"Need assert arg -s for assertion -e for error file\n");
+		exit(1);
+	}
 	nogen=!strcmp(argv[1],"-n");
+	assert=strcmp(argv[2],"-s");
+	fprintf(stderr,"%d %d",nogen,assert);
 	assemble = fopen("assemble.s", "w");
 	error = fopen("error.txt","w");
 	top_scope=NULL;

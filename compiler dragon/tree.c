@@ -136,7 +136,7 @@ void print_tree(tree_t *t, int spaces){
 	if(t == NULL){
 		return;
 	}
-	fprintf(stderr, "SPACES:%d",spaces);
+	//fprintf(stderr, "SPACES:%d",spaces);
 	for(i=0;i<spaces;i++){
 		fprintf(stderr, " ");
 	}
