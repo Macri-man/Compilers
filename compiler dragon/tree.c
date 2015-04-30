@@ -136,7 +136,7 @@ void print_tree(tree_t *t, int spaces){
 	if(t == NULL){
 		return;
 	}
-	//fprintf(stderr, "SPACES:%d",spaces);
+	fprintf(stderr, "SPACES:%d",spaces);
 	for(i=0;i<spaces;i++){
 		fprintf(stderr, " ");
 	}
@@ -270,8 +270,8 @@ void print_tree(tree_t *t, int spaces){
 			if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[IDLIST: ");
 				id_list(t->attribute.lval);
-
 			}
+
 			//fprintf(stderr, "\n");
 			break;
 		case ARGLIST:
