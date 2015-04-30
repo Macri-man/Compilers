@@ -77,7 +77,7 @@ void swap_registers(){
 }
 
 void rankify(tree_t *tree){
-	assert(tree);
+	if(tree==NULL) return;
 	if(tree->left==NULL || tree->right==NULL) return ;
 
 	if(tree->left!=NULL && tree->left->left==NULL && tree->left->right==NULL){
@@ -240,7 +240,6 @@ void genread(char *name, tree_t *tree){
 	assemble("\tmovq\t$0, %%rax\n");
 	assemble("\tcall\tscanf\n");
 
-	// TODO
 
 	return ;
 }

@@ -20,7 +20,7 @@
 	extern node_t *subprogram;
 	extern tree_t *tree;
 	extern int line_number;
-
+	int nogen;
 	int arglocaloffset;
 	int depth;
 	FILE * assemble;
@@ -107,7 +107,9 @@
 program:
 	PROGRAM ID 
 	{	
-		genmainlabel();
+		if(nogen==0){
+			genmainlabel();
+		}
 		top_scope = scope_push(top_scope,$2,PROGRAM);
 		fprintf(stderr,"\nPUSH SCOPE %s: \n",top_scope->name);
 	}
@@ -117,15 +119,19 @@ program:
 	{ arglocaloffset=0; }
 	subprogram_declarations
 	{
-		genstack($2);
-		genallocstack(top_scope->localoffset);
+		if(nogen==0){
+			genstack($2);
+			genallocstack(top_scope->localoffset);
+		}
 	}
 		compound_statement
 	'.'
 	{
-		gendeallocstack(top_scope->localoffset);
-		genleave();
-		genmain($2);
+		if(nogen==0){
+			gendeallocstack(top_scope->localoffset);
+			genleave();
+			genmain($2);
+		}
 		check_duplicate($9,top_scope);
 		$$ = make_tree(PROGRAM,make_id(temp=scope_insert(top_scope,$2,arglocaloffset)),make_tree(LIST,make_treeFromList(IDLIST,$5),make_tree(LIST,make_treeFromList(DECLIST,$9),make_tree(SUBDECLS,$11,make_tree(COMPSTAT,$13,NULL)))));
 		//print_scope(top_scope);
@@ -225,7 +231,9 @@ subprogram_head:
 				fprintf(error,"Function name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
 				//exit(1);
 			}
-			genstack($2);
+			if(nogen==0){
+				genstack($2);
+			}
 			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
 			assert(subprogram = scope_insert(top_scope,$2,arglocaloffset));
 			fprintf(stderr,"\nPUSH SCOPE %s %s: \n",top_scope->name,subprogram->name);
@@ -242,7 +250,9 @@ subprogram_head:
 			subprogram->type=$6;
 			subprogram->mark=FUNCTION;
 			subprogram->args=$4;
-			genallocstack(top_scope->localoffset);
+			if(nogen==0){
+					genallocstack(top_scope->localoffset);
+			}
 			/*assert(temp = scope_insert(top_scope,$2));
 			temp->type=FUNCTION;
 			temp->mark=$6;
@@ -262,7 +272,9 @@ subprogram_head:
 				fprintf(error,"Procedure name: %s redeclared in Scope %s on line: %d\n",$2,top_scope->name,line_number);
 				//exit(1);
 			}
-			genstack($2);
+			if(nogen==0){
+				genstack($2);
+			}
 			//insert ID into scope
 			//assert(subprogram = scope_search_all(top_scope,$2)==NULL);
 			assert(subprogram = scope_insert(top_scope,$2,arglocaloffset));
@@ -278,7 +290,9 @@ subprogram_head:
 			subprogram->type=PROCEDURE;
 			subprogram->mark=PROCEDURE;
 			subprogram->args=$4;
+			if(nogen==0){
 			genallocstack(top_scope->localoffset);
+			}
 			/*assert(temp = scope_insert(top_scope,$2));
 			temp->type=PROCEDURE;
 			temp->mark=PROCEDURE;
@@ -333,7 +347,7 @@ compound_statement
 					//exit(1);
 				}
 			}
-			$$ = $2;
+			$$=$2;
 		}
 	;
 
@@ -410,7 +424,9 @@ conditions
 				}
 			
 			$$ = make_tree(ASSIGNOP,$1,$3); 
-			genstatements($$);
+			if(nogen==0){
+				genstatements($$);
+			}		
 		}
 	| procedure_statement
 		{ $$ = $1; }
@@ -425,7 +441,9 @@ conditions
 				//exit(1);
 			} 
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,make_tree(ELSE,$6,NULL))); 
-			genIfThenElse($$);
+			if(nogen==0){
+				genIfThenElse($$);
+			}
 		}
 	| WHILE expression DO conditions
 		{ 
@@ -436,7 +454,9 @@ conditions
 			//check if expression is type boolean
 			//if(type($2)!=BOOLEAN) { fprintf(stderr,"Boolean Error: \n");  }
 			$$ = make_tree(WHILE,$2,$4);
-			genWhileDo($$);
+			if(nogen==0){			
+				genWhileDo($$);
+			}
 		}
 	| FOR ID ASSIGNOP expression TO expression DO conditions
 		{
@@ -483,7 +503,9 @@ ifelse
 			//check type of expresion is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); }
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,NULL));
-			genIfThen($$);
+			if(nogen==0){			
+				genIfThen($$);
+			}
 		}
 	| IF expression THEN conditions ELSE ifelse
 		{
@@ -494,7 +516,9 @@ ifelse
 			//check type of expression is boolean
 			//if(type($2)!=BOOLEAN){ fprintf(stderr,"Boolean Error: \n"); print_tree($2,0); } 
 			$$ = make_tree(IF,$2,make_tree(THEN,$4,make_tree(ELSE,$6,NULL)));
-			genIfThenElse($$);
+			if(nogen==0){			
+				genIfThenElse($$);
+			}
 		}
 	;
 
@@ -550,7 +574,7 @@ procedure_statement
 			$$ = make_tree(PROCEDURE,tree=make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
 			tree->type=NAME;
 			check_procedure($$,temp->name,top_scope->name);
-			gencode($$);
+			genstatements($$);
 		}
 	| WRITE '(' expression_list ')'
 		{
@@ -562,7 +586,9 @@ procedure_statement
 			}*/
 			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
 			tree->type=NAME;
-			genwrite($1,$3);
+			if(nogen==0){
+				genwrite($1,$3);
+			}
 		}
 
 	| READ '(' expression_list ')'
@@ -575,7 +601,9 @@ procedure_statement
 			}*/
 			$$ = make_tree(PROCEDURE,tree=make_id(temp),$3);
 			tree->type=NAME;
-			genread($1,$3);
+			if(nogen==0){
+				genread($1,$3);
+			}	
 		}
 	;
 
@@ -679,7 +707,7 @@ factor
 			}else{
 			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);
-				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
+			$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 				tree->scope_depth=depth;
 				check_array($$);
 			}
@@ -701,7 +729,9 @@ tree_t *tree;
 node_t *subprogram;
 int depth;
 int arglocaloffset;
-int main(){
+int main(int argc, char ** argv){
+	fprintf(stderr,"codegen %d",nogen);
+	nogen=!strcmp(argv[1],"-n");
 	assemble = fopen("assemble.s", "w");
 	error = fopen("error.txt","w");
 	top_scope=NULL;

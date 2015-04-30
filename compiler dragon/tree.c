@@ -258,9 +258,9 @@ void print_tree(tree_t *t, int spaces){
 			//fprintf(stderr, "\n");
 			break;
 		case COMPSTAT:
-			if(t->left!=NULL){
+			//if(t->left!=NULL){
 				fprintf(stderr, "[COMPOUND STATEMENTS: ");
-			}
+			//}
 			//fprintf(stderr, "\n");
 			break;
 		case LIST: 
@@ -270,6 +270,7 @@ void print_tree(tree_t *t, int spaces){
 			if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[IDLIST: ");
 				id_list(t->attribute.lval);
+
 			}
 			//fprintf(stderr, "\n");
 			break;
@@ -288,25 +289,25 @@ void print_tree(tree_t *t, int spaces){
 			//fprintf(stderr, "\n");
 			break;
 		case SUBDECLS:
-			if(t->left!=NULL){
+			//if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATIONS: ");
 				//fprintf(stderr, "\n"); 
-			}
+			//}
 			break;
 		case SUBDECL: 
-			if(t->left!=NULL){
+			//if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
-			}
+			//}
 			break;
 		case SUBPROGDECL: 
-			if(t->left!=NULL){
+			//if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
-			}
+			//}
 			break;
 		case SUBPROGDECLBODY: 
-			if(t->left!=NULL){
+			//if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM BODY DECLARATION: ");
-			}
+			//}
 			//fprintf(stderr, "\n");
 			break;
 		case PROGRAM:
