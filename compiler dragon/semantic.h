@@ -8,7 +8,7 @@ void check_function(tree_t *function,char *name,char *scope);
 void check_procedure(tree_t *procedure,char *name,char *scope);
 void check_array(tree_t *array);
 
-void lengthArg(tree_t *args,int *num);
+int lengthArg(tree_t *args);
 int equalArgs(list_t *args1,tree_t *args2);
 
 int type(tree_t *expression);

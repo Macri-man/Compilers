@@ -8,6 +8,7 @@
 
 extern FILE *assemble;
 extern scope_t *top_scope;
+extern int depth;
 
 char registers[][5] ={
 	"%r8",
@@ -31,7 +32,6 @@ typedef struct{
 
 regstack_t regstack;
 int jumpnum=0;
-int dummy=0;
 
 void init_register(){
 	reg_t *nextreg;
@@ -189,7 +189,7 @@ void genid(char *format, tree_t *tree, char *op){
 		return;
 	}
 
-	scope_search_all(top_scope, tree->attribute.sval->name,&dummy);
+	scope_search_all(top_scope, tree->attribute.sval->name,&depth);
 	if (tree->attribute.sval->depth != 0) {
 		assemble("\tmovq\t(%%rbp), %%rcx\n");
 		for (i = tree->attribute.sval->depth - 1; i != 0; i--) {
@@ -205,7 +205,7 @@ void genid(char *format, tree_t *tree, char *op){
 }
 
 int genwrite(char *name, tree_t *tree){
-	if(!tree || strcmp("write", name)) return 0;
+	if(tree==NULL || strcmp("write", name)!=0) return -1;
 
 	if(tree->type != EXPRLIST) {
 		assemble("\tmovq\t$0, %%rax\n");
@@ -216,7 +216,7 @@ int genwrite(char *name, tree_t *tree){
 		}
 		assemble("\tmovq\t$.LC0, %%rdi\n");
 		assemble("\tcall\tprintf\n");
-		return 1;
+		return 0;
 	}
 
 	assemble("\tmovq\t$0, %%rax\n");
@@ -229,11 +229,11 @@ int genwrite(char *name, tree_t *tree){
 	assemble("\tcall\tprintf\n");
 	genwrite("write", tree->left);
 
-	return 1;
+	return -1;
 }
 
 int genread(char *name, tree_t *tree){
-	if(!tree || strcmp("read", name)) return 0;
+	if(tree==NULL || strcmp("read", name)) return -1;
 
 	genid("\tleaq\t%s, %%rsi\n", tree->right, NULL);
 	assemble("\tmovq\t$.LC1, %%rdi\n");
@@ -242,7 +242,7 @@ int genread(char *name, tree_t *tree){
 
 	// TODO
 
-	return 1;
+	return 0;
 }
 
 void genaddop(tree_t *tree, reg_t *left, reg_t *right){
@@ -385,6 +385,7 @@ int genstatements(tree_t *tree){
 		genstatements(tree->right);
 		assemble("\tcall\t%s\n", tree->left->attribute.sval->name);
 		assemble("\taddq\t$%d, %%rsp\n", num_list(tree->left->attribute.sval->args)*8);
+
 	}else if(tree->type == EXPRLIST) {
 		genrelop(tree->right, "%r10");
 		assemble("\tpushq\t%%r10\n");

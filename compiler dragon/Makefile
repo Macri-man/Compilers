@@ -1,6 +1,6 @@
 dragon: y.tab.o lex.yy.o tree.o scope.o node.o list.o semantic.o gencode.o
-	clang -g -o dragon tree.o scope.o node.o list.o semantic.o y.tab.o lex.yy.o  -ll -ly
-gencode.o: gencode.c
+	clang -g -o dragon tree.o scope.o node.o list.o semantic.o gencode.o y.tab.o lex.yy.o  -ll -ly
+gencode.o: gencode.c 
 	clang -g -c gencode.c
 semantic.o: semantic.c
 	clang -g -c semantic.c

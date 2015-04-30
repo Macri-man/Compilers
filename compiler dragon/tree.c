@@ -111,6 +111,22 @@ tree_t *make_procedure(int type,tree_t *id,tree_t *arguments){
 */
 
 
+void free_tree(tree_t *tree){
+	if (tree==NULL) return;
+	if (tree->left==NULL && tree->right==NULL) {
+		free(tree);
+		return;
+	}
+
+	if(tree->left!=NULL)
+		free_tree(tree->left);
+	if(tree->right!=NULL)
+		free_tree(tree->right);
+
+	return;
+}
+
+
 
 
 /* preorder */
@@ -121,7 +137,7 @@ void print_tree(tree_t *t, int spaces){
 	if(t == NULL){
 		return;
 	}
-	//fprintf(stderr, "SPACES:%d\n",spaces);
+	//fprintf(stderr, "SPACES:%d",spaces);
 	for(i=0;i<spaces;i++){
 		fprintf(stderr, " ");
 	}
@@ -129,6 +145,7 @@ void print_tree(tree_t *t, int spaces){
 	switch(t->type){
 		case ID:
 			fprintf(stderr, "[ID:%s ",(t->attribute.sval)->name);
+			//fprintf(stderr, "\n");
 			break;
 		case NAME:
 			//fprintf(stderr, "[NAME:" );
@@ -143,130 +160,168 @@ void print_tree(tree_t *t, int spaces){
 			break;
 		case INUM:
 			fprintf(stderr, "[INUM:%d ",t->attribute.ival);
+			//fprintf(stderr, "\n");
 			break;
 		case RNUM:
 			fprintf(stderr, "[RNUM:%f ",t->attribute.rval);
+			//fprintf(stderr, "\n");
 			break;
 		case ADDOP:
 			print_opval(t->attribute.opval);
+			//fprintf(stderr, "\n");
 			break;
 		case MULOP: 
 			print_opval(t->attribute.opval);
+			//fprintf(stderr, "\n");
 			break;
 		case RELOP: 
 			print_opval(t->attribute.opval);
+			//fprintf(stderr, "\n");
 			break;
 		case ASSIGNOP: 
 			fprintf(stderr, "[ASSIGNOP: ");
+			//fprintf(stderr, "\n");
 			break;
 		case WHILE: 
 			fprintf(stderr, "[WHILE: ");
+			//fprintf(stderr, "\n");
 			break;
 		case DO: 
 			fprintf(stderr, "[DO: ");
+			//fprintf(stderr, "\n");
 			break;
 		case FOR: 
 			fprintf(stderr, "[FOR: ");
+			//fprintf(stderr, "\n");
 			break;
 		case TO: 
 			fprintf(stderr, "[TO: ");
+			//fprintf(stderr, "\n");
 			break;
 		case FROM: 
 			fprintf(stderr, "[FROM: ");
+			//fprintf(stderr, "\n");
 			break;
 		case IF: 
 			fprintf(stderr, "[IF: ");
+			//fprintf(stderr, "\n");
 			break;
 		case THEN: 
 			fprintf(stderr, "[THEN: ");
+			//fprintf(stderr, "\n");
 			break;
 		case ELSE: 
 			fprintf(stderr, "[ELSE: ");
+			//fprintf(stderr, "\n");
 			break;
 		case NOT: 
 			fprintf(stderr, "[NOT:");
+			//fprintf(stderr, "\n");
 			break;
 		case INTEGER: 
 			fprintf(stderr, "[INTEGER:");
+			//fprintf(stderr, "\n");
 			break;
 		case REAL: 
 			fprintf(stderr, "[REAL:");
+			//fprintf(stderr, "\n");
 			break;
 		case ARRAY: 
 			fprintf(stderr, "[ARRAY:");
+			//fprintf(stderr, "\n");
 			break;
 		case ARRAY_ACCESS: 
 			fprintf(stderr, "[ARRAY ACCESS: ");
+			//fprintf(stderr, "\n");
 			break;
 		case ARRAY_RANGE: 
 			fprintf(stderr, "[ARRAY RANGE: ");
+			//fprintf(stderr, "\n");
 			break;
 		case FUNCTION: 
 			fprintf(stderr, "[FUNCTION: ");
+			//fprintf(stderr, "\n");
 			break;
 		case FUNCTION_CALL: 
 			fprintf(stderr, "[FUNCTION CALL: ");
+			//fprintf(stderr, "\n");
 			break;
 		case PROCEDURE: 
 			fprintf(stderr, "[PROCEDURE: ");
+			//fprintf(stderr, "\n");
 			break;
 		case EXPRLIST:
 			fprintf(stderr, "[EXPRESSION LIST: ");
+			//fprintf(stderr, "\n");
 			break;
 		case STATLIST:
 			fprintf(stderr, "[STATEMENT LIST: ");
+			//fprintf(stderr, "\n");
 			break;
 		case COMPSTAT:
-			fprintf(stderr, "[COMPOUND STATEMENTS: ");
+			//if(t->left!=NULL){
+				fprintf(stderr, "[COMPOUND STATEMENTS: ");
+			//}
+			//fprintf(stderr, "\n");
 			break;
 		case LIST: 
-			//fprintf(stderr, "LIST:");
+		//	fprintf(stderr, "[LIST:");
 			break;
 		case IDLIST:
-			if(t->attribute.lval!=NULL){
+			//if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[IDLIST: ");
 				id_list(t->attribute.lval);
-				//fprintf(stderr, "\n");
-			}
+			//}
+			//fprintf(stderr, "\n");
 			break;
 		case ARGLIST:
-			if(t->attribute.lval!=NULL){
+			//if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[ARGLIST: ");
 				list_print(t->attribute.lval);
-				//fprintf(stderr, "\n");
-			}
+			//}
+			//fprintf(stderr, "\n");
 			break;
 		case DECLIST:
-			if(t->attribute.lval!=NULL){
+			//if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[DECLIST: ");
 				list_print(t->attribute.lval);
-				//fprintf(stderr, "\n");
-			}
+			//}
+			//fprintf(stderr, "\n");
 			break;
-		case SUBDECLS: 
-			//fprintf(stderr, "[SUBPROGRAM DECLARATIONS: \n");
+		case SUBDECLS:
+			//if(t->left!=NULL){
+				fprintf(stderr, "[SUBPROGRAM DECLARATIONS: ");
+				//fprintf(stderr, "\n"); 
+			//}
 			break;
 		case SUBDECL: 
-			fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
+			//if(t->left!=NULL){
+				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
+			//}
 			break;
 		case SUBPROGDECL: 
-			//fprintf(stderr, "[SUBPROGRAM DECLARATION: \n");
+			//if(t->left!=NULL){
+				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
+			//}
 			break;
 		case SUBPROGDECLBODY: 
-			fprintf(stderr, "[SUBPROGRAM DECLARATION BODY: ");
-			break;
+				//if(t->left!=NULL){
+					fprintf(stderr, "[SUBPROGRAM BODY DECLARATION: ");
+				//}
+				//fprintf(stderr, "\n");
+				break;
 		case PROGRAM:
 			fprintf(stderr, "[PROGRAM: ");
-			//spaces+=2;
+			//fprintf(stderr, "\n");
 			break;
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
 	fprintf(stderr, "\n");
 	/* go left */
-	print_tree(t->left,spaces+2);
+	print_tree(t->left,spaces+4);
 	/*go right */
-	print_tree(t->right,spaces+2);
+	print_tree(t->right,spaces+4);
 }
 
 
@@ -331,10 +386,10 @@ void print_type(int type){
 			fprintf(stderr, " REAL]");
 			break;
 		case INUM:
-			fprintf(stderr, " INUM]");
+			fprintf(stderr, " REAL]");
 			break;
 		case RNUM:
-			fprintf(stderr, " RNUM]");
+			fprintf(stderr, " INTEGER]");
 			break;
 		case FUNCTION:
 			fprintf(stderr, " FUNCTION]");

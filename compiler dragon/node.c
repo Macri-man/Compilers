@@ -32,3 +32,12 @@ void print_nodes(list_t *head){
 		fprintf(stderr, "\nNODES:%s",node->name);
 	}
 }
+
+void free_node(node_t *node){
+	/*if(node==NULL) return;
+	if(node->args!=NULL){
+		free_list(node->args);
+	}*/
+	free(node->name);
+	free(node);
+}

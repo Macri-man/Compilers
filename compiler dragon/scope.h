@@ -24,6 +24,8 @@ node_t *scope_insert(scope_t *head,char *name,int argorlocal);
 node_t *scope_search_all(scope_t *head,char *name,int *depth);
 
 void print_scope(scope_t *top);
+void free_scope(scope_t *scope);
+void free_scope_nodes(node_t *node);
 
 /* symbol table = stack of hash tables; stack routins */
 scope_t *scope_push(scope_t *top,char *name,int type);

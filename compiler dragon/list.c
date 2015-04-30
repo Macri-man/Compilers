@@ -66,6 +66,15 @@ void print_list(list_t *list){
 	}
 }
 
+void free_list(list_t *head){
+	if(head==NULL) return;
+	if(head->node==NULL) return;
+	for(head;head!=NULL;head=head->next){
+		if(head->node==NULL) return;
+		free_node(head->node);
+	}
+}
+
 int num_list(list_t *head){
 	assert(head!=NULL);
 	int num=0;

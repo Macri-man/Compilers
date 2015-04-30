@@ -25,5 +25,6 @@ node_t *node_search(node_t *,char *);
 node_t *node_insert(node_t *,char *,int offset);
 
 void print_nodes(struct list_s *head);
+void free_node(node_t *node);
 
 #endif

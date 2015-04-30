@@ -6,6 +6,8 @@
 #include "semantic.h"
 #include "y.tab.h"
 
+extern int line_number;
+
 int type(tree_t *expression){
 	/*if(expression->type==ARRAY_ACCESS){
 		if(expression->left->attribute.sval->type==RELOP) return BOOLEAN;
@@ -63,7 +65,7 @@ void check_duplicate(list_t *list,struct scope_s *scope){
 			if((temp->node->name != NULL) && (comp->node->name != NULL)){
 				//fprintf(stderr, "FIRST: %s  SECOND: %s\n",temp->node->name,comp->node->name);
 				if(!strcmp(temp->node->name, comp->node->name)){
-					fprintf(error," Variable redeclaration not allowed: [Variable %s redeclared in Scoped of %s]\n",temp->node->name,scope->name);
+					fprintf(error," Variable redeclaration not allowed: [Variable %s redeclared in Scoped of %s] on line: %d\n",temp->node->name,scope->name,line_number);
 					//exit(1);
 				}
 			}
@@ -78,44 +80,9 @@ void check_duplicate(list_t *list,struct scope_s *scope){
 	}
 }
 
-void lengthArg(tree_t *args,int *num){
-	//fprintf(stderr, "Number of Arguments: %d\n",*num);
-	if(args==NULL) (*num)++;
-	switch(args->type){
-		case ID:
-			(*num)++;
-			break;
-		case INUM:
-			(*num)++;
-			break;
-		case RNUM:
-			(*num)++;
-			break;
-		case ARRAY_ACCESS:
-			(*num)++;
-			break;
-		case FUNCTION_CALL:
-			(*num)++;
-			break;
-		case PROCEDURE:
-			(*num)++;
-			break;
-		case ADDOP:
-			lengthArg(args->left,num);
-			lengthArg(args->right,num); 
-			break;
-		case MULOP:
-			lengthArg(args->left,num);
-			lengthArg(args->right,num);
-			break;
-		case EXPRLIST:
-			lengthArg(args->left,num);
-			lengthArg(args->right,num);
-			break;
-		default:
-			fprintf(error, "Wrong Type in Expression: %d\n", args->type);
-			//exit(1);
-	}
+int lengthArg(tree_t *args){
+	if(args==NULL) return 0;
+	return lengthArg(args->left)+1;
 
 }
 
@@ -170,15 +137,15 @@ void check_procedure(tree_t *procedure,char *name,char *scope){
 		//assert(procedure->right!=NULL);
 		expressionTypes=procedure->right;
 		//assert(expressionTypes!=NULL);
-		lengthArg(expressionTypes,&length);
+		length=lengthArg(expressionTypes);
 		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
 		if(num_list(functionArgs)!=length){
-			fprintf(error, "In Procdure %s Wrong Number of Arguments %d in Scope %s\n",name,length,scope);
+			fprintf(error, "In Procdure %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
 			//exit(1);
 		}
 
 		if(equalArgs(functionArgs,expressionTypes)==-1){
-			fprintf(error, "In Procdure %s Wrong Arguments Types in Scope %s\n",name,scope);
+			fprintf(error, "In Procdure %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
 			//exit(1);
 		}
 	}
@@ -200,15 +167,15 @@ void check_function(tree_t *function,char *name,char *scope){
 	}else{
 		expressionTypes=function->right;
 		//assert(expressionTypes!=NULL);
-		lengthArg(expressionTypes,&length);
+		length=lengthArg(expressionTypes);
 		//fprintf(stderr, "Number of Arguments: %d %d\n",num_list(functionArgs),length);
 		if(num_list(functionArgs)!=length){
-			fprintf(error, "In Function %s Wrong Number of Arguments %d in Scope %s\n",name,length,scope);
+			fprintf(error, "In Function Call %s Wrong Number of Arguments %d in Scope %s on line: %d\n",name,length,scope,line_number);
 			//exit(1);
 		}
 
 		if(equalArgs(functionArgs,expressionTypes)==-1){
-			fprintf(error, "In Function %s Wrong Arguments Types in Scope %s\n",name,scope);
+			fprintf(error, "In Function Call %s Wrong Arguments Types in Scope %s on line: %d\n",name,scope,line_number);
 			//exit(1);
 		}
 	}

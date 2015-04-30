@@ -46,7 +46,7 @@ tree_t *make_treeFromList(int type,struct list_s *ls);
 tree_t *make_idlist(int type,struct list_s *idlist);
 
 
-
+void free_tree(tree_t *tree);
 
 void list_print(struct list_s *l);
 void id_list(struct list_s *head);

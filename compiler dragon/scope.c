@@ -84,15 +84,32 @@ scope_t *scope_push(scope_t *top, char *name,int type){
 
 /* pop top scope */
 scope_t *scope_pop(scope_t *top){
-	scope_t *tmp=top;
+	scope_t *temp=top;
 	if(top!=NULL){
-		tmp=top;
+		temp=top;
 		top=top->next;
 
-		//free_scope(tmp);
+		//free_scope(temp);
 
 		return top;
 	}else return NULL;
+}
+
+void free_scope_nodes(node_t *node){
+	node_t *temp=NULL;
+	for(node=temp;temp!=NULL && node!=NULL;){
+		temp=node->next;
+		free_node(node);
+		node=temp;
+	}
+}
+
+void free_scope(scope_t *scope){
+	int i;
+	for(i=0;i<HASH_SIZE;i++){
+		free_scope_nodes(scope->table[i]);
+	}
+	free(scope);
 }
 
 void print_scope(scope_t *top){
