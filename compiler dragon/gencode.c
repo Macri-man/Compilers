@@ -109,7 +109,7 @@ void genmainlabel(){
 	assemble("\t.string \"%%ld\\n\"\n");
 	assemble(".LC1:\n");
 	assemble("\t.string \"%%ld\"\n");
-	assemble("\t.global main\n");
+	assemble("\t.globl main\n");
 
 	//return 0;
 }
@@ -204,8 +204,8 @@ void genid(char *format, tree_t *tree, char *op){
 	}
 }
 
-int genwrite(char *name, tree_t *tree){
-	if(tree==NULL || strcmp("write", name)!=0) return -1;
+void genwrite(char *name, tree_t *tree){
+	if(tree==NULL || strcmp("write", name)!=0) return ;
 
 	if(tree->type != EXPRLIST) {
 		assemble("\tmovq\t$0, %%rax\n");
@@ -216,7 +216,7 @@ int genwrite(char *name, tree_t *tree){
 		}
 		assemble("\tmovq\t$.LC0, %%rdi\n");
 		assemble("\tcall\tprintf\n");
-		return 0;
+		return ;
 	}
 
 	assemble("\tmovq\t$0, %%rax\n");
@@ -229,11 +229,11 @@ int genwrite(char *name, tree_t *tree){
 	assemble("\tcall\tprintf\n");
 	genwrite("write", tree->left);
 
-	return -1;
+	return ;
 }
 
-int genread(char *name, tree_t *tree){
-	if(tree==NULL || strcmp("read", name)) return -1;
+void genread(char *name, tree_t *tree){
+	if(tree==NULL || strcmp("read", name)) return ;
 
 	genid("\tleaq\t%s, %%rsi\n", tree->right, NULL);
 	assemble("\tmovq\t$.LC1, %%rdi\n");
@@ -242,7 +242,7 @@ int genread(char *name, tree_t *tree){
 
 	// TODO
 
-	return 0;
+	return ;
 }
 
 void genaddop(tree_t *tree, reg_t *left, reg_t *right){
@@ -266,7 +266,6 @@ void genaddop(tree_t *tree, reg_t *left, reg_t *right){
 		return ;
 	}
 	assert(right);
-	fprintf(stderr,"yep,getting here\n");
 	assemble("\taddq\t%s, %s\n", registers[left->index], registers[right->index]);
 
 }
@@ -306,12 +305,35 @@ void genrelop(tree_t *tree, char *reg){
 	}
 }
 
+void genIfThenElse(tree_t *tree){
+	gencode(tree->left);
+	genjmp(tree->left, 0);
+	jmp("jmp", 1);
+	genlabel();
+	jmp("jmp",1); 
+	genlabel();
+	genlabel();
+}
+
+void genWhileDo(tree_t *tree){
+	jmp("jmp",1);
+	genlabel();
+	genlabel();
+	gencode(tree->left); 
+	genjmp(tree->left, -2);
+}
+
+void genIfThen(tree_t *tree){
+	gencode(tree->right->left);
+	genjmp(tree->right->left, 0);
+}
+
 
 void gencode(tree_t *tree){
 	reg_t *right;
 
-	if(!tree->left && !tree->left && tree->rank == 0) {
-		fprintf(stderr, "Well this is embarrassing...\n");
+	if(tree->left==NULL && tree->rank == 0) {
+		fprintf(stderr, "INVALID RANK\n");
 		return ;
 	}
 
@@ -359,20 +381,20 @@ void gencode(tree_t *tree){
 }
 
 
-int genstatements(tree_t *tree){
-	if(!tree) return -1;
+void genstatements(tree_t *tree){
+	if(tree==NULL) return ;
 	//tree_print(t);
 
-	printf("Creation of Assembly\n");
+	printf("\nCreation of Assembly\n");
 
 	if (tree->type == ASSIGNOP) {
 		if (tree->right->type == INUM) {
 			assemble("\tmovq\t$%d, %d(%%rbp)\n", tree->right->attribute.ival, tree->left->attribute.sval->offset);
-			return 0;
+			return ;
 		}else if(tree->right->type == ID){
 			assemble("\tmovq\t%d(%%rbp), %%rdx\n", tree->right->attribute.sval->offset);
 			assemble("\tmovq\t%%rdx, %d(%%rbp)\n", tree->left->attribute.sval->offset);
-			return 0;
+			return ;
 		}
 		rankify(tree->right);
 		fprintf(stderr, "ASNOP to a %d\n", tree->right->attribute.opval);
@@ -381,7 +403,7 @@ int genstatements(tree_t *tree){
 		gencode(tree->right);
 		assemble("\tmovq\t%s, %d(%%rbp)\n", registers[regstack.topstack->index], tree->left->attribute.sval->offset);
 		dealloc_register();
-	}else if(tree->type == PROCEDURE_CALL){
+	}else if(tree->type == PROCEDURE){
 		genstatements(tree->right);
 		assemble("\tcall\t%s\n", tree->left->attribute.sval->name);
 		assemble("\taddq\t$%d, %%rsp\n", num_list(tree->left->attribute.sval->args)*8);

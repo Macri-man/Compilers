@@ -131,7 +131,6 @@ void free_tree(tree_t *tree){
 
 /* preorder */
 void print_tree(tree_t *t, int spaces){
-
 	int i;
 
 	if(t == NULL){
@@ -259,57 +258,57 @@ void print_tree(tree_t *t, int spaces){
 			//fprintf(stderr, "\n");
 			break;
 		case COMPSTAT:
-			//if(t->left!=NULL){
+			if(t->left!=NULL){
 				fprintf(stderr, "[COMPOUND STATEMENTS: ");
-			//}
+			}
 			//fprintf(stderr, "\n");
 			break;
 		case LIST: 
 		//	fprintf(stderr, "[LIST:");
 			break;
 		case IDLIST:
-			//if(t->attribute.lval!=NULL){
+			if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[IDLIST: ");
 				id_list(t->attribute.lval);
-			//}
+			}
 			//fprintf(stderr, "\n");
 			break;
 		case ARGLIST:
-			//if(t->attribute.lval!=NULL){
+			if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[ARGLIST: ");
 				list_print(t->attribute.lval);
-			//}
+			}
 			//fprintf(stderr, "\n");
 			break;
 		case DECLIST:
-			//if(t->attribute.lval!=NULL){
+			if(t->attribute.lval!=NULL){
 				fprintf(stderr, "[DECLIST: ");
 				list_print(t->attribute.lval);
-			//}
+			}
 			//fprintf(stderr, "\n");
 			break;
 		case SUBDECLS:
-			//if(t->left!=NULL){
+			if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATIONS: ");
 				//fprintf(stderr, "\n"); 
-			//}
+			}
 			break;
 		case SUBDECL: 
-			//if(t->left!=NULL){
+			if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
-			//}
+			}
 			break;
 		case SUBPROGDECL: 
-			//if(t->left!=NULL){
+			if(t->left!=NULL){
 				fprintf(stderr, "[SUBPROGRAM DECLARATION: ");
-			//}
+			}
 			break;
 		case SUBPROGDECLBODY: 
-				//if(t->left!=NULL){
-					fprintf(stderr, "[SUBPROGRAM BODY DECLARATION: ");
-				//}
-				//fprintf(stderr, "\n");
-				break;
+			if(t->left!=NULL){
+				fprintf(stderr, "[SUBPROGRAM BODY DECLARATION: ");
+			}
+			//fprintf(stderr, "\n");
+			break;
 		case PROGRAM:
 			fprintf(stderr, "[PROGRAM: ");
 			//fprintf(stderr, "\n");
@@ -317,7 +316,9 @@ void print_tree(tree_t *t, int spaces){
 		default:
 			fprintf(stderr, "[UNKOWN]");
 	}
-	fprintf(stderr, "\n");
+	if(t->type!=LIST){
+		fprintf(stderr, "\n");
+	}
 	/* go left */
 	print_tree(t->left,spaces+4);
 	/*go right */
