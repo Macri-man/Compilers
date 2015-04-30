@@ -391,8 +391,8 @@ conditions
 	: variable ASSIGNOP expression
 		{
 			//check type of variable == type of expression
-			//fprintf(stderr,"\nCheck: %d \n",check_type($1));
-			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			fprintf(stderr,"\nCheck: %d \n",check_type($1));
+			fprintf(stderr,"\nCheck: %d \n",check_type($3));
 			/*if(check_type($3)==PROCEDURE){
 				fprintf(stderr,"Procedures cannot return values\n");
 				exit(1);
@@ -792,7 +792,7 @@ factor
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
-			}else if(check_type($3)!=INUM){
+			}else if(lengthArg($3)==1 && $3->right->type!=INUM){
 				if(assert!=0){
 					fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
 				}else{
@@ -801,6 +801,16 @@ factor
 				}
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 				tree->scope_depth=depth;
+			}else if(lengthArg($3)>1 && check_type($3->left) != INUM && check_type($3->right)!=INUM){
+		      if(assert!=0){
+		         fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
+			   }else{
+			      fprintf(stderr,"Array Access needs to be INTEGER on line: %d\n",line_number);
+			      exit(1);
+			   }
+				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
+				tree->scope_depth=depth;
+
 			}else{
 			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);
