@@ -78,14 +78,14 @@ void swap_registers(){
 
 void rankify(tree_t *tree){
 	assert(tree);
-	if(!(tree->left || tree->right)) return ;
+	if(tree->left==NULL || tree->right==NULL) return ;
 
-	if(tree->left && !tree->left->left && !tree->left->right){
+	if(tree->left!=NULL && tree->left->left==NULL && tree->left->right==NULL){
 		tree->left->rank = 1;
 		printf("%d = %d\n", tree->left->type, tree->left->rank);
 	}
 
-	if(tree->right && !tree->right->left && !tree->right->right){
+	if(tree->right!=NULL && tree->right->left==NULL && tree->right->right==NULL){
 		tree->right->rank = 0;
 		printf("%d = %d\n", tree->right->type, tree->right->rank);
 	}
