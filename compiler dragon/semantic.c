@@ -126,15 +126,16 @@ int equalArgs(list_t *functionArgs,tree_t *expressionTypes){
 	for(list=functionArgs;list->next!=NULL;list=list->next);
 	temp=list->node;
 	//fprintf(stderr, "%s\n",temp->name);
-	for(temp,tree=expressionTypes;temp!=NULL && tree->type==EXPRLIST;temp=temp->next,tree=tree->left){
+	for(temp,tree=expressionTypes;temp!=NULL && tree!=NULL;temp=temp->next,tree=tree->left){
 		//fprintf(stderr, "TREE:%d\n",tree->type);
-		if(tree->left->type!=EXPRLIST){
+		/*if(tree->left->type!=EXPRLIST){
 			//fprintf(stderr, "tree:%d %s list%d %s\n",tree->right->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
 			if(check_type(tree)!=temp->type) return -1;
 		}else{
 			//fprintf(stderr, "tree:%d %s list%d %s\n",tree->attribute.sval->type,tree->attribute.sval->name,temp->type,temp->name);
 			if(check_type(tree->right)!=temp->type) return -1;
-		}
+		}*/
+		if(check_type(tree->right)!=temp->type) return -1;
 	}
 	return 0;
 }

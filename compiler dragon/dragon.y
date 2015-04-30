@@ -22,6 +22,8 @@
 	int depth;
 	FILE * assemble;
 	FILE * error;
+
+	extern int line_number;
 %}
 
 %union{

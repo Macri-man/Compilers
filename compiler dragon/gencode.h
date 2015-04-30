@@ -1,13 +1,18 @@
 #include "tree.h"
 
-#define assemble(...) fprintf(gen_code, __VA_ARGS__)
+#define assemble(...) fprintf(assemble, __VA_ARGS__)
 
-int gencode(tree_t * t);
-int gen_preamble(void);
-int gen_postamble(char * name);
-int gen_intro(char * name);
-int gen_outro(void);
-int gen_stalloc(int off);
-int gen_dealloc(int off);
-int gen_write(char * name, tree_t * t);
-int gen_read(char * name, tree_t * t);
+void genmainlabel();
+void genmain(char *name);
+void genstack(char *name);
+void genleave();
+void genallocstack(int offset);
+void gendeallocstack(int offset);
+void jmp(char *jmp,int offset);
+void genlabel();
+void genjmp(tree_t *tree,int offset);
+void genrelop(tree_t *tree, char *reg);
+int genwrite(char *name, tree_t *tree);
+int genread(char *name, tree_t *tree);
+void gencode(tree_t *tree);
+int genstatements(tree_t *tree);

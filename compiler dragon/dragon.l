@@ -10,7 +10,7 @@
 
 void echo(char *message);
 
-int line_number;
+int line_number = 1;
 
 %}
 
