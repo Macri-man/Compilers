@@ -344,6 +344,8 @@ parameter_list
 			//make list of identifier list and append id list to the parameter list
 			$$ = list_append($1,$3); 
 		}
+        | /* empty */
+            { $$ = NULL; }
 	;
 
 compound_statement
@@ -391,8 +393,8 @@ conditions
 	: variable ASSIGNOP expression
 		{
 			//check type of variable == type of expression
-			fprintf(stderr,"\nCheck: %d \n",check_type($1));
-			fprintf(stderr,"\nCheck: %d \n",check_type($3));
+			//fprintf(stderr,"\nCheck: %d \n",check_type($1));
+			//fprintf(stderr,"\nCheck: %d \n",check_type($3));
 			/*if(check_type($3)==PROCEDURE){
 				fprintf(stderr,"Procedures cannot return values\n");
 				exit(1);
@@ -638,6 +640,14 @@ procedure_statement
 	| ID '(' expression_list ')'
 		{
 			//search ID and check if valid procedure call
+		if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
+			    if(assert!=0){
+				fprintf(error,"Procedure %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+			    }else{
+				fprintf(stderr,"Procedure %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				exit(1);
+			    }
+		}
 			$$ = make_tree(PROCEDURE,tree=make_id(temp=scope_search_all(top_scope,$1,&depth)),$3);
 			tree->type=NAME;
 			check_procedure($$,temp->name,top_scope->name);
@@ -645,7 +655,7 @@ procedure_statement
 				genstatements($$);
 			}
 		}
-	| WRITE '(' expression_list ')'
+	| WRITE '(' expression ')'
 		{
 			temp=make_node($1);
 			temp->type=FUNCTION;
@@ -660,7 +670,7 @@ procedure_statement
 			}
 		}
 
-	| READ '(' expression_list ')'
+	| READ '(' expression ')'
 		{
 			temp=make_node($1);
 			temp->type=FUNCTION;
@@ -719,7 +729,9 @@ term
 	;
 
 factor
-	: ID {
+	: ID {          
+                        //temp=scope_search_all(top_scope,"c",&depth);
+                        //fprintf(stderr,"name: %s",temp->name);
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				if(assert!=0){
 				fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
@@ -731,7 +743,6 @@ factor
 				temp->type=0;
 				temp->mark=0;
 				$$ = tree = make_id(temp);
-				tree->scope_depth=depth;
 			}else if(temp->mark==PROCEDURE){
 			if(assert!=0){
 				fprintf(error,"Procedures cannot return values on line: %d\n",line_number);
@@ -740,21 +751,19 @@ factor
 				exit(1);
 				}
 				$$ = tree = make_id(temp);
-				tree->scope_depth=depth;
 			}else{
 				$$ = tree = make_id(temp);
-				tree->scope_depth=depth;
 			} 
 		}
 	| ID '(' expression_list ')' 
 		{
 			//fprintf(stderr,"id %s\n",$1);
 			//check if valid function call
-			if((temp=scope_search(top_scope,$1)) == NULL){
+			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				if(assert!=0){
-					fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(error,"Function ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 				}else{
-				 	fprintf(stderr,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				 	fprintf(stderr,"Function ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 					exit(1);
 				}
 				temp=make_node($1);
@@ -778,21 +787,21 @@ factor
 				check_function($$,temp->name,top_scope->name); 
 			}
 		}
-	| ID '[' expression_list ']' 
+	| ID '[' expression ']' 
 		{ 
 			//check if valid array access
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				if(assert!=0){
-					fprintf(error,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(error,"Array Access ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 				}else{
-					fprintf(stderr,"ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(stderr,"Array Access ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 					exit(1);
 				}
 				temp=make_node($1);
 				temp->type=0;
 				temp->mark=0;
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
-			}else if(lengthArg($3)==1 && $3->right->type!=INUM){
+			}else if(check_type($3)!=INUM){
 				if(assert!=0){
 					fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
 				}else{
@@ -800,17 +809,6 @@ factor
 					exit(1);
 				}
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
-				tree->scope_depth=depth;
-			}else if(lengthArg($3)>1 && check_type($3->left) != INUM && check_type($3->right)!=INUM){
-		      if(assert!=0){
-		         fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
-			   }else{
-			      fprintf(stderr,"Array Access needs to be INTEGER on line: %d\n",line_number);
-			      exit(1);
-			   }
-				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
-				tree->scope_depth=depth;
-
 			}else{
 			//temp=scope_search_all(top_scope,$1,&depth);
 			//fprintf(stderr,"[SCOPE %s EXPECTED %s ACTUAL %s",top_scope->name,$1,temp->name);

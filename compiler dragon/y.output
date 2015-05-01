@@ -99,88 +99,89 @@ Grammar
 
    26 parameter_list: identifier_list ':' type
    27               | parameter_list ';' identifier_list ':' type
+   28               | %empty
 
-   28 compound_statement: BBEGIN optional_statements END
+   29 compound_statement: BBEGIN optional_statements END
 
-   29 optional_statements: statement_list
-   30                    | %empty
+   30 optional_statements: statement_list
+   31                    | %empty
 
-   31 statement_list: statement
-   32               | statement_list ';' statement
+   32 statement_list: statement
+   33               | statement_list ';' statement
 
-   33 statement: conditions
-   34          | ifelse
+   34 statement: conditions
+   35          | ifelse
 
-   35 conditions: variable ASSIGNOP expression
-   36           | procedure_statement
-   37           | compound_statement
-   38           | IF expression THEN conditions ELSE conditions
-   39           | WHILE expression DO conditions
-   40           | FOR ID ASSIGNOP expression TO expression DO conditions
+   36 conditions: variable ASSIGNOP expression
+   37           | procedure_statement
+   38           | compound_statement
+   39           | IF expression THEN conditions ELSE conditions
+   40           | WHILE expression DO conditions
+   41           | FOR ID ASSIGNOP expression TO expression DO conditions
 
-   41 ifelse: IF expression THEN statement
-   42       | IF expression THEN conditions ELSE ifelse
+   42 ifelse: IF expression THEN statement
+   43       | IF expression THEN conditions ELSE ifelse
 
-   43 variable: ID
-   44         | ID '[' expression ']'
+   44 variable: ID
+   45         | ID '[' expression ']'
 
-   45 procedure_statement: ID
-   46                    | ID '(' expression_list ')'
-   47                    | WRITE '(' expression_list ')'
-   48                    | READ '(' expression_list ')'
+   46 procedure_statement: ID
+   47                    | ID '(' expression_list ')'
+   48                    | WRITE '(' expression ')'
+   49                    | READ '(' expression ')'
 
-   49 expression_list: expression
-   50                | expression_list ',' expression
+   50 expression_list: expression
+   51                | expression_list ',' expression
 
-   51 expression: simple_expression
-   52           | simple_expression RELOP simple_expression
+   52 expression: simple_expression
+   53           | simple_expression RELOP simple_expression
 
-   53 simple_expression: term
-   54                  | ADDOP term
-   55                  | simple_expression ADDOP term
+   54 simple_expression: term
+   55                  | ADDOP term
+   56                  | simple_expression ADDOP term
 
-   56 term: factor
-   57     | term MULOP factor
+   57 term: factor
+   58     | term MULOP factor
 
-   58 factor: ID
-   59       | ID '(' expression_list ')'
-   60       | ID '[' expression_list ']'
-   61       | INUM
-   62       | RNUM
-   63       | '(' expression ')'
-   64       | NOT factor
+   59 factor: ID
+   60       | ID '(' expression_list ')'
+   61       | ID '[' expression ']'
+   62       | INUM
+   63       | RNUM
+   64       | '(' expression ')'
+   65       | NOT factor
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 5 24 46 47 48 59 63
-')' (41) 5 24 46 47 48 59 63
-',' (44) 7 50
+'(' (40) 5 24 47 48 49 60 64
+')' (41) 5 24 47 48 49 60 64
+',' (44) 7 51
 '.' (46) 5
 ':' (58) 8 20 26 27
-';' (59) 5 8 14 20 22 27 32
-'[' (91) 11 44 60
-']' (93) 11 44 60
+';' (59) 5 8 14 20 22 27 33
+'[' (91) 11 45 61
+']' (93) 11 45 61
 error (256)
 NUMBER (258)
-INUM (259) 11 61
-RNUM (260) 62
-ID (261) 5 6 7 20 22 40 43 44 45 46 58 59 60
-NOT (262) 64
-ASSIGNOP (263) 35 40
-RELOP (264) 52
+INUM (259) 11 62
+RNUM (260) 63
+ID (261) 5 6 7 20 22 41 44 45 46 47 59 60 61
+NOT (262) 65
+ASSIGNOP (263) 36 41
+RELOP (264) 53
 LT (265)
 LE (266)
 GT (267)
 GE (268)
 EQ (269)
 NEQ (270)
-ADDOP (271) 54 55
+ADDOP (271) 55 56
 OR (272)
 PLUS (273)
 MINUS (274)
-MULOP (275) 57
+MULOP (275) 58
 AND (276)
 STAR (277)
 SLASH (278)
@@ -198,17 +199,17 @@ STRING (289)
 BOOLEAN (290)
 FUNCTION (291) 20
 PROCEDURE (292) 22
-READ (293) 48
-WRITE (294) 47
-BBEGIN (295) 28
-END (296) 28
-IF (297) 38 41 42
-THEN (298) 38 41 42
-ELSE (299) 38 42
-WHILE (300) 39
-DO (301) 39 40
-FOR (302) 40
-TO (303) 40
+READ (293) 49
+WRITE (294) 48
+BBEGIN (295) 29
+END (296) 29
+IF (297) 39 42 43
+THEN (298) 39 42 43
+ELSE (299) 39 43
+WHILE (300) 40
+DO (301) 40 41
+FOR (302) 41
+TO (303) 41
 EMTPY (304)
 CONDITIONAL (305)
 TYPE (306)
@@ -281,33 +282,33 @@ arguments (103)
 $@9 (104)
     on left: 23, on right: 24
 parameter_list (105)
-    on left: 26 27, on right: 24 27
+    on left: 26 27 28, on right: 24 27
 compound_statement (106)
-    on left: 28, on right: 5 18 37
+    on left: 29, on right: 5 18 38
 optional_statements (107)
-    on left: 29 30, on right: 28
+    on left: 30 31, on right: 29
 statement_list (108)
-    on left: 31 32, on right: 29 32
+    on left: 32 33, on right: 30 33
 statement (109)
-    on left: 33 34, on right: 31 32 41
+    on left: 34 35, on right: 32 33 42
 conditions (110)
-    on left: 35 36 37 38 39 40, on right: 33 38 39 40 42
+    on left: 36 37 38 39 40 41, on right: 34 39 40 41 43
 ifelse (111)
-    on left: 41 42, on right: 34 42
+    on left: 42 43, on right: 35 43
 variable (112)
-    on left: 43 44, on right: 35
+    on left: 44 45, on right: 36
 procedure_statement (113)
-    on left: 45 46 47 48, on right: 36
+    on left: 46 47 48 49, on right: 37
 expression_list (114)
-    on left: 49 50, on right: 46 47 48 50 59 60
+    on left: 50 51, on right: 47 51 60
 expression (115)
-    on left: 51 52, on right: 35 38 39 40 41 42 44 49 50 63
+    on left: 52 53, on right: 36 39 40 41 42 43 45 48 49 50 51 61 64
 simple_expression (116)
-    on left: 53 54 55, on right: 51 52 55
+    on left: 54 55 56, on right: 52 53 56
 term (117)
-    on left: 56 57, on right: 53 54 55 57
+    on left: 57 58, on right: 54 55 56 58
 factor (118)
-    on left: 58 59 60 61 62 63 64, on right: 56 57 64
+    on left: 59 60 61 62 63 64 65, on right: 57 58 65
 
 
 State 0
@@ -580,7 +581,7 @@ State 31
 
 State 32
 
-   28 compound_statement: BBEGIN . optional_statements END
+   29 compound_statement: BBEGIN . optional_statements END
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -590,7 +591,7 @@ State 32
     WHILE   shift, and go to state 44
     FOR     shift, and go to state 45
 
-    $default  reduce using rule 30 (optional_statements)
+    $default  reduce using rule 31 (optional_statements)
 
     compound_statement   go to state 46
     optional_statements  go to state 47
@@ -663,37 +664,37 @@ State 39
 
 State 40
 
-   43 variable: ID .
-   44         | ID . '[' expression ']'
-   45 procedure_statement: ID .
-   46                    | ID . '(' expression_list ')'
+   44 variable: ID .
+   45         | ID . '[' expression ']'
+   46 procedure_statement: ID .
+   47                    | ID . '(' expression_list ')'
 
     '('  shift, and go to state 60
     '['  shift, and go to state 61
 
-    ASSIGNOP  reduce using rule 43 (variable)
-    $default  reduce using rule 45 (procedure_statement)
+    ASSIGNOP  reduce using rule 44 (variable)
+    $default  reduce using rule 46 (procedure_statement)
 
 
 State 41
 
-   48 procedure_statement: READ . '(' expression_list ')'
+   49 procedure_statement: READ . '(' expression ')'
 
     '('  shift, and go to state 62
 
 
 State 42
 
-   47 procedure_statement: WRITE . '(' expression_list ')'
+   48 procedure_statement: WRITE . '(' expression ')'
 
     '('  shift, and go to state 63
 
 
 State 43
 
-   38 conditions: IF . expression THEN conditions ELSE conditions
-   41 ifelse: IF . expression THEN statement
-   42       | IF . expression THEN conditions ELSE ifelse
+   39 conditions: IF . expression THEN conditions ELSE conditions
+   42 ifelse: IF . expression THEN statement
+   43       | IF . expression THEN conditions ELSE ifelse
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -710,7 +711,7 @@ State 43
 
 State 44
 
-   39 conditions: WHILE . expression DO conditions
+   40 conditions: WHILE . expression DO conditions
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -727,68 +728,68 @@ State 44
 
 State 45
 
-   40 conditions: FOR . ID ASSIGNOP expression TO expression DO conditions
+   41 conditions: FOR . ID ASSIGNOP expression TO expression DO conditions
 
     ID  shift, and go to state 75
 
 
 State 46
 
-   37 conditions: compound_statement .
+   38 conditions: compound_statement .
 
-    $default  reduce using rule 37 (conditions)
+    $default  reduce using rule 38 (conditions)
 
 
 State 47
 
-   28 compound_statement: BBEGIN optional_statements . END
+   29 compound_statement: BBEGIN optional_statements . END
 
     END  shift, and go to state 76
 
 
 State 48
 
-   29 optional_statements: statement_list .
-   32 statement_list: statement_list . ';' statement
+   30 optional_statements: statement_list .
+   33 statement_list: statement_list . ';' statement
 
     ';'  shift, and go to state 77
 
-    $default  reduce using rule 29 (optional_statements)
+    $default  reduce using rule 30 (optional_statements)
 
 
 State 49
 
-   31 statement_list: statement .
+   32 statement_list: statement .
 
-    $default  reduce using rule 31 (statement_list)
+    $default  reduce using rule 32 (statement_list)
 
 
 State 50
 
-   33 statement: conditions .
-
-    $default  reduce using rule 33 (statement)
-
-
-State 51
-
-   34 statement: ifelse .
+   34 statement: conditions .
 
     $default  reduce using rule 34 (statement)
 
 
+State 51
+
+   35 statement: ifelse .
+
+    $default  reduce using rule 35 (statement)
+
+
 State 52
 
-   35 conditions: variable . ASSIGNOP expression
+   36 conditions: variable . ASSIGNOP expression
 
     ASSIGNOP  shift, and go to state 78
 
 
 State 53
 
-   36 conditions: procedure_statement .
+   37 conditions: procedure_statement .
 
-    $default  reduce using rule 36 (conditions)
+    $default  reduce using rule 37 (conditions)
 
 
 State 54
@@ -840,7 +841,7 @@ State 59
 
 State 60
 
-   46 procedure_statement: ID '(' . expression_list ')'
+   47 procedure_statement: ID '(' . expression_list ')'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -858,7 +859,7 @@ State 60
 
 State 61
 
-   44 variable: ID '[' . expression ']'
+   45 variable: ID '[' . expression ']'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -875,7 +876,7 @@ State 61
 
 State 62
 
-   48 procedure_statement: READ '(' . expression_list ')'
+   49 procedure_statement: READ '(' . expression ')'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -884,8 +885,7 @@ State 62
     ADDOP  shift, and go to state 68
     '('    shift, and go to state 69
 
-    expression_list    go to state 87
-    expression         go to state 85
+    expression         go to state 87
     simple_expression  go to state 71
     term               go to state 72
     factor             go to state 73
@@ -893,7 +893,7 @@ State 62
 
 State 63
 
-   47 procedure_statement: WRITE '(' . expression_list ')'
+   48 procedure_statement: WRITE '(' . expression ')'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -902,8 +902,7 @@ State 63
     ADDOP  shift, and go to state 68
     '('    shift, and go to state 69
 
-    expression_list    go to state 88
-    expression         go to state 85
+    expression         go to state 88
     simple_expression  go to state 71
     term               go to state 72
     factor             go to state 73
@@ -911,33 +910,33 @@ State 63
 
 State 64
 
-   61 factor: INUM .
-
-    $default  reduce using rule 61 (factor)
-
-
-State 65
-
-   62 factor: RNUM .
+   62 factor: INUM .
 
     $default  reduce using rule 62 (factor)
 
 
+State 65
+
+   63 factor: RNUM .
+
+    $default  reduce using rule 63 (factor)
+
+
 State 66
 
-   58 factor: ID .
-   59       | ID . '(' expression_list ')'
-   60       | ID . '[' expression_list ']'
+   59 factor: ID .
+   60       | ID . '(' expression_list ')'
+   61       | ID . '[' expression ']'
 
     '('  shift, and go to state 89
     '['  shift, and go to state 90
 
-    $default  reduce using rule 58 (factor)
+    $default  reduce using rule 59 (factor)
 
 
 State 67
 
-   64 factor: NOT . factor
+   65 factor: NOT . factor
 
     INUM  shift, and go to state 64
     RNUM  shift, and go to state 65
@@ -950,7 +949,7 @@ State 67
 
 State 68
 
-   54 simple_expression: ADDOP . term
+   55 simple_expression: ADDOP . term
 
     INUM  shift, and go to state 64
     RNUM  shift, and go to state 65
@@ -964,7 +963,7 @@ State 68
 
 State 69
 
-   63 factor: '(' . expression ')'
+   64 factor: '(' . expression ')'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -981,66 +980,66 @@ State 69
 
 State 70
 
-   38 conditions: IF expression . THEN conditions ELSE conditions
-   41 ifelse: IF expression . THEN statement
-   42       | IF expression . THEN conditions ELSE ifelse
+   39 conditions: IF expression . THEN conditions ELSE conditions
+   42 ifelse: IF expression . THEN statement
+   43       | IF expression . THEN conditions ELSE ifelse
 
     THEN  shift, and go to state 94
 
 
 State 71
 
-   51 expression: simple_expression .
-   52           | simple_expression . RELOP simple_expression
-   55 simple_expression: simple_expression . ADDOP term
+   52 expression: simple_expression .
+   53           | simple_expression . RELOP simple_expression
+   56 simple_expression: simple_expression . ADDOP term
 
     RELOP  shift, and go to state 95
     ADDOP  shift, and go to state 96
 
-    $default  reduce using rule 51 (expression)
+    $default  reduce using rule 52 (expression)
 
 
 State 72
 
-   53 simple_expression: term .
-   57 term: term . MULOP factor
+   54 simple_expression: term .
+   58 term: term . MULOP factor
 
     MULOP  shift, and go to state 97
 
-    $default  reduce using rule 53 (simple_expression)
+    $default  reduce using rule 54 (simple_expression)
 
 
 State 73
 
-   56 term: factor .
+   57 term: factor .
 
-    $default  reduce using rule 56 (term)
+    $default  reduce using rule 57 (term)
 
 
 State 74
 
-   39 conditions: WHILE expression . DO conditions
+   40 conditions: WHILE expression . DO conditions
 
     DO  shift, and go to state 98
 
 
 State 75
 
-   40 conditions: FOR ID . ASSIGNOP expression TO expression DO conditions
+   41 conditions: FOR ID . ASSIGNOP expression TO expression DO conditions
 
     ASSIGNOP  shift, and go to state 99
 
 
 State 76
 
-   28 compound_statement: BBEGIN optional_statements END .
+   29 compound_statement: BBEGIN optional_statements END .
 
-    $default  reduce using rule 28 (compound_statement)
+    $default  reduce using rule 29 (compound_statement)
 
 
 State 77
 
-   32 statement_list: statement_list ';' . statement
+   33 statement_list: statement_list ';' . statement
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1060,7 +1059,7 @@ State 77
 
 State 78
 
-   35 conditions: variable ASSIGNOP . expression
+   36 conditions: variable ASSIGNOP . expression
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1107,6 +1106,8 @@ State 82
 
     ID  shift, and go to state 7
 
+    $default  reduce using rule 28 (parameter_list)
+
     identifier_list  go to state 105
     parameter_list   go to state 106
 
@@ -1120,8 +1121,8 @@ State 83
 
 State 84
 
-   46 procedure_statement: ID '(' expression_list . ')'
-   50 expression_list: expression_list . ',' expression
+   47 procedure_statement: ID '(' expression_list . ')'
+   51 expression_list: expression_list . ',' expression
 
     ')'  shift, and go to state 107
     ','  shift, and go to state 108
@@ -1129,39 +1130,35 @@ State 84
 
 State 85
 
-   49 expression_list: expression .
+   50 expression_list: expression .
 
-    $default  reduce using rule 49 (expression_list)
+    $default  reduce using rule 50 (expression_list)
 
 
 State 86
 
-   44 variable: ID '[' expression . ']'
+   45 variable: ID '[' expression . ']'
 
     ']'  shift, and go to state 109
 
 
 State 87
 
-   48 procedure_statement: READ '(' expression_list . ')'
-   50 expression_list: expression_list . ',' expression
+   49 procedure_statement: READ '(' expression . ')'
 
     ')'  shift, and go to state 110
-    ','  shift, and go to state 108
 
 
 State 88
 
-   47 procedure_statement: WRITE '(' expression_list . ')'
-   50 expression_list: expression_list . ',' expression
+   48 procedure_statement: WRITE '(' expression . ')'
 
     ')'  shift, and go to state 111
-    ','  shift, and go to state 108
 
 
 State 89
 
-   59 factor: ID '(' . expression_list ')'
+   60 factor: ID '(' . expression_list ')'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1179,7 +1176,7 @@ State 89
 
 State 90
 
-   60 factor: ID '[' . expression_list ']'
+   61 factor: ID '[' . expression ']'
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1188,8 +1185,7 @@ State 90
     ADDOP  shift, and go to state 68
     '('    shift, and go to state 69
 
-    expression_list    go to state 113
-    expression         go to state 85
+    expression         go to state 113
     simple_expression  go to state 71
     term               go to state 72
     factor             go to state 73
@@ -1197,33 +1193,33 @@ State 90
 
 State 91
 
-   64 factor: NOT factor .
+   65 factor: NOT factor .
 
-    $default  reduce using rule 64 (factor)
+    $default  reduce using rule 65 (factor)
 
 
 State 92
 
-   54 simple_expression: ADDOP term .
-   57 term: term . MULOP factor
+   55 simple_expression: ADDOP term .
+   58 term: term . MULOP factor
 
     MULOP  shift, and go to state 97
 
-    $default  reduce using rule 54 (simple_expression)
+    $default  reduce using rule 55 (simple_expression)
 
 
 State 93
 
-   63 factor: '(' expression . ')'
+   64 factor: '(' expression . ')'
 
     ')'  shift, and go to state 114
 
 
 State 94
 
-   38 conditions: IF expression THEN . conditions ELSE conditions
-   41 ifelse: IF expression THEN . statement
-   42       | IF expression THEN . conditions ELSE ifelse
+   39 conditions: IF expression THEN . conditions ELSE conditions
+   42 ifelse: IF expression THEN . statement
+   43       | IF expression THEN . conditions ELSE ifelse
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1243,7 +1239,7 @@ State 94
 
 State 95
 
-   52 expression: simple_expression RELOP . simple_expression
+   53 expression: simple_expression RELOP . simple_expression
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1259,7 +1255,7 @@ State 95
 
 State 96
 
-   55 simple_expression: simple_expression ADDOP . term
+   56 simple_expression: simple_expression ADDOP . term
 
     INUM  shift, and go to state 64
     RNUM  shift, and go to state 65
@@ -1273,7 +1269,7 @@ State 96
 
 State 97
 
-   57 term: term MULOP . factor
+   58 term: term MULOP . factor
 
     INUM  shift, and go to state 64
     RNUM  shift, and go to state 65
@@ -1286,7 +1282,7 @@ State 97
 
 State 98
 
-   39 conditions: WHILE expression DO . conditions
+   40 conditions: WHILE expression DO . conditions
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1304,7 +1300,7 @@ State 98
 
 State 99
 
-   40 conditions: FOR ID ASSIGNOP . expression TO expression DO conditions
+   41 conditions: FOR ID ASSIGNOP . expression TO expression DO conditions
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1321,16 +1317,16 @@ State 99
 
 State 100
 
-   32 statement_list: statement_list ';' statement .
+   33 statement_list: statement_list ';' statement .
 
-    $default  reduce using rule 32 (statement_list)
+    $default  reduce using rule 33 (statement_list)
 
 
 State 101
 
-   35 conditions: variable ASSIGNOP expression .
+   36 conditions: variable ASSIGNOP expression .
 
-    $default  reduce using rule 35 (conditions)
+    $default  reduce using rule 36 (conditions)
 
 
 State 102
@@ -1381,14 +1377,14 @@ State 106
 
 State 107
 
-   46 procedure_statement: ID '(' expression_list ')' .
+   47 procedure_statement: ID '(' expression_list ')' .
 
-    $default  reduce using rule 46 (procedure_statement)
+    $default  reduce using rule 47 (procedure_statement)
 
 
 State 108
 
-   50 expression_list: expression_list ',' . expression
+   51 expression_list: expression_list ',' . expression
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1405,29 +1401,29 @@ State 108
 
 State 109
 
-   44 variable: ID '[' expression ']' .
+   45 variable: ID '[' expression ']' .
 
-    $default  reduce using rule 44 (variable)
+    $default  reduce using rule 45 (variable)
 
 
 State 110
 
-   48 procedure_statement: READ '(' expression_list ')' .
+   49 procedure_statement: READ '(' expression ')' .
 
-    $default  reduce using rule 48 (procedure_statement)
+    $default  reduce using rule 49 (procedure_statement)
 
 
 State 111
 
-   47 procedure_statement: WRITE '(' expression_list ')' .
+   48 procedure_statement: WRITE '(' expression ')' .
 
-    $default  reduce using rule 47 (procedure_statement)
+    $default  reduce using rule 48 (procedure_statement)
 
 
 State 112
 
-   50 expression_list: expression_list . ',' expression
-   59 factor: ID '(' expression_list . ')'
+   51 expression_list: expression_list . ',' expression
+   60 factor: ID '(' expression_list . ')'
 
     ')'  shift, and go to state 130
     ','  shift, and go to state 108
@@ -1435,68 +1431,66 @@ State 112
 
 State 113
 
-   50 expression_list: expression_list . ',' expression
-   60 factor: ID '[' expression_list . ']'
+   61 factor: ID '[' expression . ']'
 
-    ','  shift, and go to state 108
     ']'  shift, and go to state 131
 
 
 State 114
 
-   63 factor: '(' expression ')' .
+   64 factor: '(' expression ')' .
 
-    $default  reduce using rule 63 (factor)
+    $default  reduce using rule 64 (factor)
 
 
 State 115
 
-   41 ifelse: IF expression THEN statement .
+   42 ifelse: IF expression THEN statement .
 
-    $default  reduce using rule 41 (ifelse)
+    $default  reduce using rule 42 (ifelse)
 
 
 State 116
 
-   33 statement: conditions .
-   38 conditions: IF expression THEN conditions . ELSE conditions
-   42 ifelse: IF expression THEN conditions . ELSE ifelse
+   34 statement: conditions .
+   39 conditions: IF expression THEN conditions . ELSE conditions
+   43 ifelse: IF expression THEN conditions . ELSE ifelse
 
     ELSE  shift, and go to state 132
 
-    $default  reduce using rule 33 (statement)
+    $default  reduce using rule 34 (statement)
 
 
 State 117
 
-   52 expression: simple_expression RELOP simple_expression .
-   55 simple_expression: simple_expression . ADDOP term
+   53 expression: simple_expression RELOP simple_expression .
+   56 simple_expression: simple_expression . ADDOP term
 
     ADDOP  shift, and go to state 96
 
-    $default  reduce using rule 52 (expression)
+    $default  reduce using rule 53 (expression)
 
 
 State 118
 
-   55 simple_expression: simple_expression ADDOP term .
-   57 term: term . MULOP factor
+   56 simple_expression: simple_expression ADDOP term .
+   58 term: term . MULOP factor
 
     MULOP  shift, and go to state 97
 
-    $default  reduce using rule 55 (simple_expression)
+    $default  reduce using rule 56 (simple_expression)
 
 
 State 119
 
-   57 term: term MULOP factor .
+   58 term: term MULOP factor .
 
-    $default  reduce using rule 57 (term)
+    $default  reduce using rule 58 (term)
 
 
 State 120
 
-   38 conditions: IF . expression THEN conditions ELSE conditions
+   39 conditions: IF . expression THEN conditions ELSE conditions
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1513,14 +1507,14 @@ State 120
 
 State 121
 
-   39 conditions: WHILE expression DO conditions .
+   40 conditions: WHILE expression DO conditions .
 
-    $default  reduce using rule 39 (conditions)
+    $default  reduce using rule 40 (conditions)
 
 
 State 122
 
-   40 conditions: FOR ID ASSIGNOP expression . TO expression DO conditions
+   41 conditions: FOR ID ASSIGNOP expression . TO expression DO conditions
 
     TO  shift, and go to state 134
 
@@ -1576,29 +1570,29 @@ State 128
 
 State 129
 
-   50 expression_list: expression_list ',' expression .
+   51 expression_list: expression_list ',' expression .
 
-    $default  reduce using rule 50 (expression_list)
+    $default  reduce using rule 51 (expression_list)
 
 
 State 130
 
-   59 factor: ID '(' expression_list ')' .
-
-    $default  reduce using rule 59 (factor)
-
-
-State 131
-
-   60 factor: ID '[' expression_list ']' .
+   60 factor: ID '(' expression_list ')' .
 
     $default  reduce using rule 60 (factor)
 
 
+State 131
+
+   61 factor: ID '[' expression ']' .
+
+    $default  reduce using rule 61 (factor)
+
+
 State 132
 
-   38 conditions: IF expression THEN conditions ELSE . conditions
-   42 ifelse: IF expression THEN conditions ELSE . ifelse
+   39 conditions: IF expression THEN conditions ELSE . conditions
+   43 ifelse: IF expression THEN conditions ELSE . ifelse
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1617,14 +1611,14 @@ State 132
 
 State 133
 
-   38 conditions: IF expression . THEN conditions ELSE conditions
+   39 conditions: IF expression . THEN conditions ELSE conditions
 
     THEN  shift, and go to state 140
 
 
 State 134
 
-   40 conditions: FOR ID ASSIGNOP expression TO . expression DO conditions
+   41 conditions: FOR ID ASSIGNOP expression TO . expression DO conditions
 
     INUM   shift, and go to state 64
     RNUM   shift, and go to state 65
@@ -1667,21 +1661,21 @@ State 137
 
 State 138
 
-   38 conditions: IF expression THEN conditions ELSE conditions .
+   39 conditions: IF expression THEN conditions ELSE conditions .
 
-    $default  reduce using rule 38 (conditions)
+    $default  reduce using rule 39 (conditions)
 
 
 State 139
 
-   42 ifelse: IF expression THEN conditions ELSE ifelse .
+   43 ifelse: IF expression THEN conditions ELSE ifelse .
 
-    $default  reduce using rule 42 (ifelse)
+    $default  reduce using rule 43 (ifelse)
 
 
 State 140
 
-   38 conditions: IF expression THEN . conditions ELSE conditions
+   39 conditions: IF expression THEN . conditions ELSE conditions
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1699,7 +1693,7 @@ State 140
 
 State 141
 
-   40 conditions: FOR ID ASSIGNOP expression TO expression . DO conditions
+   41 conditions: FOR ID ASSIGNOP expression TO expression . DO conditions
 
     DO  shift, and go to state 145
 
@@ -1725,14 +1719,14 @@ State 143
 
 State 144
 
-   38 conditions: IF expression THEN conditions . ELSE conditions
+   39 conditions: IF expression THEN conditions . ELSE conditions
 
     ELSE  shift, and go to state 147
 
 
 State 145
 
-   40 conditions: FOR ID ASSIGNOP expression TO expression DO . conditions
+   41 conditions: FOR ID ASSIGNOP expression TO expression DO . conditions
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1757,7 +1751,7 @@ State 146
 
 State 147
 
-   38 conditions: IF expression THEN conditions ELSE . conditions
+   39 conditions: IF expression THEN conditions ELSE . conditions
 
     ID      shift, and go to state 40
     READ    shift, and go to state 41
@@ -1775,6 +1769,6 @@ State 147
 
 State 148
 
-   40 conditions: FOR ID ASSIGNOP expression TO expression DO conditions .
+   41 conditions: FOR ID ASSIGNOP expression TO expression DO conditions .
 
-    $default  reduce using rule 40 (conditions)
+    $default  reduce using rule 41 (conditions)
