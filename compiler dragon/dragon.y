@@ -617,10 +617,10 @@ variable
 				$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
 			}else if(check_type($3)!=INUM){
 				if(assert!=0){
-				fprintf(error,"Array Access %s needs to be INTEGER on line: %d\n",temp->name,line_number);
+				    fprintf(error,"Array Access of %s needs to be INTEGER on line: %d\n",$1,line_number);
 				}else{
-				fprintf(stderr,"Array Access %s needs to be INTEGER on line: %d\n",temp->name,line_number);
-				exit(1);
+				    fprintf(stderr,"Array Access of %s needs to be INTEGER on line: %d\n",$1,line_number);
+				    exit(1);
 				}
 				$$ = make_tree(ARRAY_ACCESS,make_id(temp),$3);
 			}else{
@@ -761,9 +761,9 @@ factor
 			//check if valid function call
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				if(assert!=0){
-					fprintf(error,"Function ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(error,"Function Call %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 				}else{
-				 	fprintf(stderr,"Function ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+				 	fprintf(stderr,"Function Call %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 					exit(1);
 				}
 				temp=make_node($1);
@@ -792,9 +792,9 @@ factor
 			//check if valid array access
 			if((temp=scope_search_all(top_scope,$1,&depth)) == NULL){
 				if(assert!=0){
-					fprintf(error,"Array Access ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(error,"Array Access of %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 				}else{
-					fprintf(stderr,"Array Access ID %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
+					fprintf(stderr,"Array Access of %s used but not defined in Scope of %s on line: %d\n",$1,top_scope->name,line_number);
 					exit(1);
 				}
 				temp=make_node($1);
@@ -803,9 +803,9 @@ factor
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
 			}else if(check_type($3)!=INUM){
 				if(assert!=0){
-					fprintf(error,"Array Access needs to be INTEGER on line: %d\n",line_number);
+					fprintf(error,"Array Access of %s needs to be INTEGER on line: %d\n",$1,line_number);
 				}else{
-					fprintf(stderr,"Array Access needs to be INTEGER on line: %d\n",line_number);
+					fprintf(stderr,"Array Access of %s needs to be INTEGER on line: %d\n",$1,line_number);
 					exit(1);
 				}
 				$$ = make_tree(ARRAY_ACCESS,tree=make_id(temp),$3);
